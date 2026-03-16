@@ -183,6 +183,23 @@ Por eso ahora el default recomendado en `.env` es:
 
 `mirror_first` devuelve el **primer paquete binario tal cual (mirror)** y luego usa ACK hex. Esto ayuda justo en casos como tu log (`RECV len=140` y desconexión rápida).
 
+## 3.6) Checklist rápido de readiness de login
+
+Ejecuta:
+
+```bash
+python tools/check_login_readiness.py
+```
+
+El script valida:
+
+- existencia de `GodsWar.exe`, `Net.dll`, `LoginUI.xml`
+- sincronía entre `Eterna Guerra Online/config.ini` y `WORLD_IP/WORLD_PORT`
+- que `EMULATOR_BINARY_REPLY_MODE` esté en `mirror_first`
+- que `EMULATOR_PORTS` incluya `GAME_SERVER_PORT`
+
+Si falla **solo** en `Protocol completeness`, significa que la parte de archivos/config está bien y lo pendiente es replicar respuestas binarias del protocolo legacy para lista de servidor/región.
+
 ## 4) Validación de estado online
 
 - `GET http://127.0.0.1:8080/health`
