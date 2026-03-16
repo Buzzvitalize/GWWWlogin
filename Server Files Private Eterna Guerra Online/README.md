@@ -69,8 +69,8 @@ Esto abre:
 
 ### Solución si antes fallaba el World Emulator
 
-Se corrigió el `.bat` para evitar error de comillas y PATH (`El sistema no puede ejecutar el programa especificado`).
-Ahora usa rutas absolutas y prioriza `api\.venv\Scripts\python.exe`.
+Se reforzó el `.bat` para evitar errores de sintaxis de ruta/volumen.
+Ahora usa ruta absoluta normalizada, `start /D` y ejecuta Python del venv directamente (sin `cmd /k` anidado).
 
 ## 4) Validación de estado online
 

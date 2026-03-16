@@ -2,6 +2,7 @@
 setlocal
 
 set "ROOT=%~dp0.."
+for %%I in ("%ROOT%") do set "ROOT=%%~fI"
 cd /d "%ROOT%"
 
 set "VENV_PY=%ROOT%\api\.venv\Scripts\python.exe"
