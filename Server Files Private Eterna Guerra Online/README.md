@@ -25,7 +25,8 @@ Y mantiene opción editable para cambiar a SQL Auth o otro server en el futuro.
 - `scripts/start_world_emulator.sh` / `.bat`: arranque del game emulator.
 - `api/assets/en_us_login_bundle.json`: bundle de textos/login+errores tomado del cliente legacy.
 - `tools/build_en_us_login_bundle.py`: regenera el bundle desde `Localization/en_us/Text`.
-- `scripts/start_local_stack.bat`: arranque todo-en-uno para Windows.
+- `scripts/start_local_stack.bat`: arranque todo-en-uno para Windows (incluye sync automático de `Eterna Guerra Online/config.ini`).
+- `../tools/sync_client_server_config.py`: sincroniza `WORLD_IP/WORLD_PORT` (`api/.env`) hacia `Eterna Guerra Online/config.ini`.
 
 ## 1) Preparar SQL Server 2025
 
@@ -52,9 +53,28 @@ DB_CONNECTION_STRING=
 API_PORT=8080
 WORLD_IP=127.0.0.1
 WORLD_PORT=5999
+GAME_SERVER_IP=127.0.0.1
+GAME_SERVER_PORT=7000
 ```
 
 > En `trusted`, `DB_USER`/`DB_PASSWORD` no se usan para conectar; se usa tu sesión Windows.
+
+## Compatibilidad con configuración LoginServer/GameServer (referencia externa)
+
+Si estás siguiendo una configuración tipo:
+
+- LoginServer: `127.0.0.1:5999`
+- GameServer: `127.0.0.1:7000`
+
+ajusta en `api/.env`:
+
+- `WORLD_IP=127.0.0.1`
+- `WORLD_PORT=5999`
+- `GAME_SERVER_IP=127.0.0.1`
+- `GAME_SERVER_PORT=7000`
+- `EMULATOR_PORTS=5999,7000,6000,29000`
+
+> En este repo la BD actual sigue siendo SQL Server (no MySQL) y no se usa Redis en el flujo base.
 
 ## 3) Encendido rápido (Windows)
 
@@ -65,8 +85,9 @@ scripts\start_local_stack.bat
 
 Esto abre:
 
-1. Game Emulator (`127.0.0.1:5999`)
-2. Login/API (`127.0.0.1:8080`)
+1. Sync de `Eterna Guerra Online/config.ini` con `WORLD_IP/WORLD_PORT`
+2. Game Emulator (`127.0.0.1:5999`)
+3. Login/API (`127.0.0.1:8080`)
 
 
 ### Solución si antes fallaba el World Emulator
@@ -135,6 +156,13 @@ Cuando ves esto:
 significa que **sí conecta por TCP**, pero el cliente rechaza la respuesta de protocolo y cierra.
 No es un problema de IP/puerto, es de **handshake binario**.
 
+Si en log ves `RECV len=140` y después `SEND len=4` + `DISCONNECT`, significa que el cliente sí llega al LoginServer pero rechaza el ACK corto (4 bytes) para ese paquete.
+En ese caso prueba temporalmente:
+
+- `EMULATOR_BINARY_REPLY_MODE=echo`
+
+y vuelve a capturar `logs/world_emulator_packets.log` para aproximar la respuesta real esperada por el cliente.
+
 Por eso ahora el default recomendado en `.env` es:
 
 - `EMULATOR_MODE=hybrid`
@@ -148,6 +176,7 @@ Por eso ahora el default recomendado en `.env` es:
 - `GET http://127.0.0.1:8080/health`
 - `GET http://127.0.0.1:8080/db/config`
 - `GET http://127.0.0.1:8080/emulator/status`
+- `GET http://127.0.0.1:8080/directory/regions`
 
 Para pruebas correctas, debe aparecer `"message": "Sistema Online"`.
 

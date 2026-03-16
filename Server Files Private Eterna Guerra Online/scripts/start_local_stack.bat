@@ -29,6 +29,9 @@ if errorlevel 1 (
 )
 
 echo [INFO] Iniciando Game Emulator...
+echo [INFO] Sincronizando config del cliente con WORLD_IP/WORLD_PORT...
+call "%VENV_PY%" "%ROOT%\..\tools\sync_client_server_config.py"
+
 start "EternaGuerra-WorldEmulator" /D "%ROOT%" "%VENV_PY%" "%ROOT%\emulator\world_emulator.py"
 
 echo [INFO] Iniciando Login/API...
