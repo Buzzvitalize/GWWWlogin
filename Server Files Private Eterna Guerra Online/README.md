@@ -206,3 +206,17 @@ python tools/analyze_world_log.py
 ```
 
 para ver resumen por cliente y firma del primer paquete.
+
+
+### Confirmación adicional (cuando no hay logs TCP)
+
+En algunos builds legacy, el cliente primero valida disponibilidad por UDP y solo después abre TCP.
+Por eso se añadió también listener UDP en los mismos puertos del emulador.
+
+Config clave:
+
+- `EMULATOR_PORTS=5999,6000,29000`
+- `EMULATOR_ENABLE_UDP=1`
+- `EMULATOR_UDP_REPLY_HEX=47 57 68 7C`
+
+Con esto, aunque el cliente no inicie TCP al principio, verás `UDP_RECV`/`UDP_SEND` en el log.

@@ -11,7 +11,8 @@ if not LOG.exists():
 
 EVENTS = {
     'CONNECT', 'SEND_HELLO', 'RECV', 'SEND', 'DISCONNECT', 'KEEPALIVE',
-    'HELLO_FAIL', 'CONNECTION_ERROR', 'KEEPALIVE_FAIL', 'SEND_SKIP_EMPTY'
+    'HELLO_FAIL', 'CONNECTION_ERROR', 'KEEPALIVE_FAIL', 'SEND_SKIP_EMPTY',
+    'UDP_RECV', 'UDP_SEND'
 }
 
 
@@ -33,17 +34,11 @@ def main() -> None:
             continue
         counts[event] += 1
 
-        client = None
-        for token in reversed(parts):
-            if ':' in token and token.count('.') >= 1 and token.replace(':', '').replace('.', '').isdigit() is False:
-                # fallback skip weird tokens
-                pass
-            if token.count(':') == 1 and token.replace('.', '').replace(':', '').isdigit():
-                client = token
-                break
+        m = re.search(r"\b(?:\d{1,3}\.){3}\d{1,3}:\d+\b", line)
+        client = m.group(0) if m else None
         if client:
             by_client[client][event] += 1
-            if event == 'RECV' and client not in first_recv_hex:
+            if event in {'RECV', 'UDP_RECV'} and client not in first_recv_hex:
                 idx = line.find('hex=')
                 if idx != -1:
                     hex_data = line[idx + 4:].strip()
@@ -59,15 +54,15 @@ def main() -> None:
         sig = first_recv_hex.get(client, '-')
         print(
             f'  {client}: CONNECT={c["CONNECT"]} HELLO={c["SEND_HELLO"]} '
-            f'RECV={c["RECV"]} SEND={c["SEND"]} DISCONNECT={c["DISCONNECT"]} first16={sig}'
+            f'RECV={c["RECV"]} UDP_RECV={c["UDP_RECV"]} SEND={c["SEND"]} '
+            f'UDP_SEND={c["UDP_SEND"]} DISCONNECT={c["DISCONNECT"]} first16={sig}'
         )
 
-    if counts['RECV'] > 0 and counts['DISCONNECT'] >= counts['RECV']:
-        print('\nHint: if clients RECV once then disconnect, use:')
-        print('  EMULATOR_MODE=hybrid')
-        print('  EMULATOR_BINARY_REPLY_MODE=ack')
-        print('  EMULATOR_BINARY_REPLY_HEX=47 57 68 7C')
-        print('  EMULATOR_PORTS=5999,6000,29000')
+    if counts['CONNECT'] == 0 and counts['UDP_RECV'] == 0:
+        print('\nHint: client may not be reaching emulator host/ports at all.')
+        print('Check config.ini IP/PORT and local firewall rules.')
+    elif counts['UDP_RECV'] > 0 and counts['CONNECT'] == 0:
+        print('\nHint: client is only pinging via UDP. Keep UDP enabled and tune TCP target port list.')
 
 
 if __name__ == '__main__':
