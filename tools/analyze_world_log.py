@@ -3,8 +3,16 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 from pathlib import Path
+import re
 
-LOG = Path('logs/world_emulator_packets.log')
+LOG = Path('Server Files Private Eterna Guerra Online/logs/world_emulator_packets.log')
+if not LOG.exists():
+    LOG = Path('logs/world_emulator_packets.log')
+
+EVENTS = {
+    'CONNECT', 'SEND_HELLO', 'RECV', 'SEND', 'DISCONNECT', 'KEEPALIVE',
+    'HELLO_FAIL', 'CONNECTION_ERROR', 'KEEPALIVE_FAIL', 'SEND_SKIP_EMPTY'
+}
 
 
 def main() -> None:
@@ -18,21 +26,30 @@ def main() -> None:
 
     for line in LOG.read_text(encoding='utf-8', errors='replace').splitlines():
         parts = line.split()
-        if len(parts) < 3:
+        if len(parts) < 2:
             continue
-        event = parts[2]
+        event = parts[1]
+        if event not in EVENTS:
+            continue
         counts[event] += 1
-        if len(parts) >= 4:
-            client = parts[3]
+
+        client = None
+        for token in reversed(parts):
+            if ':' in token and token.count('.') >= 1 and token.replace(':', '').replace('.', '').isdigit() is False:
+                # fallback skip weird tokens
+                pass
+            if token.count(':') == 1 and token.replace('.', '').replace(':', '').isdigit():
+                client = token
+                break
+        if client:
             by_client[client][event] += 1
             if event == 'RECV' and client not in first_recv_hex:
-                # guardamos firma de primer paquete (primeros 16 bytes)
-                marker = 'hex='
-                idx = line.find(marker)
+                idx = line.find('hex=')
                 if idx != -1:
-                    hex_data = line[idx + len(marker):].strip()
+                    hex_data = line[idx + 4:].strip()
                     first_recv_hex[client] = ' '.join(hex_data.split()[:16])
 
+    print('Log path:', LOG)
     print('Global events:')
     for k, v in counts.most_common():
         print(f'  {k}: {v}')
@@ -50,6 +67,7 @@ def main() -> None:
         print('  EMULATOR_MODE=hybrid')
         print('  EMULATOR_BINARY_REPLY_MODE=ack')
         print('  EMULATOR_BINARY_REPLY_HEX=47 57 68 7C')
+        print('  EMULATOR_PORTS=5999,6000,29000')
 
 
 if __name__ == '__main__':

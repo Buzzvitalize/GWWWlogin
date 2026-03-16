@@ -180,3 +180,29 @@ Para pruebas correctas, debe aparecer `"message": "Sistema Online"`.
 - Password hash en SQL con `HASHBYTES('SHA2_256', salt + ':' + password)`.
 - Límite por cuenta: máximo 3 personajes.
 - Todo está orientado a **emulación local** y pruebas, no a producción oficial.
+
+
+### Caso: "The server is not yet available" y no aparece log
+
+Eso suele indicar que el cliente está intentando otro puerto además de `5999` o no está escribiendo en la ruta de log esperada.
+
+Se ajustó el emulador para escuchar múltiples puertos en paralelo:
+
+- `EMULATOR_PORTS=5999,6000,29000`
+
+Y para escribir log en ruta absoluta por defecto:
+
+- `Server Files Private Eterna Guerra Online/logs/world_emulator_packets.log`
+
+Pasos recomendados:
+
+1. Copia `api/.env.example` a `api/.env` (si no lo hiciste después de esta actualización).
+2. Inicia `scripts\start_local_stack.bat`.
+3. Revisa si hay conexiones en cualquiera de esos puertos en la consola del emulador.
+4. Ejecuta:
+
+```bash
+python tools/analyze_world_log.py
+```
+
+para ver resumen por cliente y firma del primer paquete.
