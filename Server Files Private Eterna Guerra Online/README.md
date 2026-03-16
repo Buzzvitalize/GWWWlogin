@@ -25,7 +25,8 @@ Y mantiene opción editable para cambiar a SQL Auth o otro server en el futuro.
 - `scripts/start_world_emulator.sh` / `.bat`: arranque del game emulator.
 - `api/assets/en_us_login_bundle.json`: bundle de textos/login+errores tomado del cliente legacy.
 - `tools/build_en_us_login_bundle.py`: regenera el bundle desde `Localization/en_us/Text`.
-- `scripts/start_local_stack.bat`: arranque todo-en-uno para Windows.
+- `scripts/start_local_stack.bat`: arranque todo-en-uno para Windows (incluye sync automático de `Eterna Guerra Online/config.ini`).
+- `../tools/sync_client_server_config.py`: sincroniza `WORLD_IP/WORLD_PORT` (`api/.env`) hacia `Eterna Guerra Online/config.ini`.
 
 ## 1) Preparar SQL Server 2025
 
@@ -65,8 +66,9 @@ scripts\start_local_stack.bat
 
 Esto abre:
 
-1. Game Emulator (`127.0.0.1:5999`)
-2. Login/API (`127.0.0.1:8080`)
+1. Sync de `Eterna Guerra Online/config.ini` con `WORLD_IP/WORLD_PORT`
+2. Game Emulator (`127.0.0.1:5999`)
+3. Login/API (`127.0.0.1:8080`)
 
 
 ### Solución si antes fallaba el World Emulator
