@@ -77,6 +77,24 @@ Ahora usa ruta absoluta normalizada, `start /D` y ejecuta Python del venv direct
 
 ## Diagnóstico para error "Verifying" -> "Connection error. Please refresh The Game"
 
+
+### Confirmación técnica importante (GodsWar.exe)
+
+El cliente **NO consume** la API HTTP (`/auth/login`) directamente; usa protocolo socket propietario en `Net.dll`.
+Por eso, aunque la API esté arriba, si el handshake binario inicial no coincide, aparece:
+
+- `Connection error. Please refresh the game`
+
+Qué agregamos para cerrar esta brecha:
+
+- servidor-first hello configurable (`EMULATOR_SEND_HELLO_ON_CONNECT=1`)
+- secuencia inicial configurable (`EMULATOR_HELLO_SEQUENCE_HEX`, default `47 57 68 7C`)
+- texto inicial configurable (`EMULATOR_HELLO_TEXT`)
+- logging detallado de paquetes para calibrar handshake real
+
+Si todavía falla, el siguiente paso es ajustar **paquete por paquete** con `logs/world_emulator_packets.log` hasta replicar el protocolo de login original.
+
+
 Se detectó una causa probable: el emulador anterior cerraba la conexión demasiado pronto y no mantenía sesión/socket.
 
 Ahora `world_emulator.py` trabaja en modo persistente y soporta:
