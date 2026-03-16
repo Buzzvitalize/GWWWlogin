@@ -1,0 +1,12 @@
+{
+  "description": "Reglas de respuesta binaria para emular handshake/login legacy.",
+  "fallback_reply_hex": "47 57 68 7C",
+  "rules": [
+    {
+      "name": "first_login_probe_140_bytes",
+      "length": 140,
+      "starts_with": "AC 9A BD 26",
+      "reply": "AC 9A BD 26"
+    }
+  ]
+}

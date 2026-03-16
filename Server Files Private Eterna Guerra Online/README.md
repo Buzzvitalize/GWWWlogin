@@ -175,13 +175,21 @@ En ese caso prueba temporalmente:
 
 y vuelve a capturar `logs/world_emulator_packets.log` para aproximar la respuesta real esperada por el cliente.
 
+Para acelerar calibración de handshake:
+
+```bash
+python tools/build_packet_script_from_log.py
+```
+
+Ese comando toma el primer `RECV` binario del log y genera/actualiza `emulator/packet_script.json` con una regla inicial.
+
 Por eso ahora el default recomendado en `.env` es:
 
 - `EMULATOR_MODE=hybrid`
-- `EMULATOR_BINARY_REPLY_MODE=mirror_first`
+- `EMULATOR_BINARY_REPLY_MODE=scripted`
 - `EMULATOR_BINARY_REPLY_HEX=47 57 68 7C`
 
-`mirror_first` devuelve el **primer paquete binario tal cual (mirror)** y luego usa ACK hex. Esto ayuda justo en casos como tu log (`RECV len=140` y desconexión rápida).
+`scripted` permite responder por reglas (prefijo+longitud) definidas en `emulator/packet_script.json`, ideal para emular handshake/login propietario por pasos.
 
 ## 3.6) Checklist rápido de readiness de login
 
@@ -195,7 +203,8 @@ El script valida:
 
 - existencia de `GodsWar.exe`, `Net.dll`, `LoginUI.xml`
 - sincronía entre `Eterna Guerra Online/config.ini` y `WORLD_IP/WORLD_PORT`
-- que `EMULATOR_BINARY_REPLY_MODE` esté en `mirror_first`
+- que `EMULATOR_BINARY_REPLY_MODE` esté en `scripted` o `mirror_first`
+- que exista `EMULATOR_PACKET_SCRIPT_FILE`
 - que `EMULATOR_PORTS` incluya `GAME_SERVER_PORT`
 
 Si falla **solo** en `Protocol completeness`, significa que la parte de archivos/config está bien y lo pendiente es replicar respuestas binarias del protocolo legacy para lista de servidor/región.

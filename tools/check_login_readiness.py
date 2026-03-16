@@ -70,13 +70,17 @@ def check_env_values(env: dict[str, str]) -> list[CheckResult]:
     mode = env.get("EMULATOR_BINARY_REPLY_MODE", "")
     ports = env.get("EMULATOR_PORTS", "")
     game_port = env.get("GAME_SERVER_PORT", "7000")
+    script_file = env.get("EMULATOR_PACKET_SCRIPT_FILE", "emulator/packet_script.json")
 
     has_game_port = game_port in {x.strip() for x in ports.split(",") if x.strip()}
+    mode_ok = mode in {"scripted", "mirror_first"}
+    script_ok = (REPO_ROOT / "Server Files Private Eterna Guerra Online" / script_file).exists()
 
     return [
         CheckResult("EMULATOR_BINARY_REPLY_MODE set", bool(mode), f"mode={mode or '<empty>'}"),
-        CheckResult("EMULATOR_BINARY_REPLY_MODE uses mirror_first", mode == "mirror_first", f"mode={mode or '<empty>'}"),
+        CheckResult("EMULATOR_BINARY_REPLY_MODE uses scripted/mirror_first", mode_ok, f"mode={mode or '<empty>'}"),
         CheckResult("EMULATOR_PORTS includes GAME_SERVER_PORT", has_game_port, f"ports={ports} game_port={game_port}"),
+        CheckResult("EMULATOR_PACKET_SCRIPT_FILE exists", script_ok, f"script={script_file}"),
     ]
 
 
