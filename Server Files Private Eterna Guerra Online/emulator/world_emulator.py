@@ -27,7 +27,8 @@ load_env_file(ROOT_DIR / "api" / ".env.example")
 
 WORLD_HOST = os.getenv("WORLD_IP", "127.0.0.1")
 WORLD_PORT = int(os.getenv("WORLD_PORT", "5999"))
-EMULATOR_PORTS = os.getenv("EMULATOR_PORTS", f"{WORLD_PORT},6000,29000")
+GAME_SERVER_PORT = int(os.getenv("GAME_SERVER_PORT", "7000"))
+EMULATOR_PORTS = os.getenv("EMULATOR_PORTS", f"{WORLD_PORT},{GAME_SERVER_PORT},6000,29000")
 
 EMULATOR_MODE = os.getenv("EMULATOR_MODE", "hybrid")  # hybrid | echo | text
 BINARY_REPLY_MODE = os.getenv("EMULATOR_BINARY_REPLY_MODE", "ack")  # ack | echo

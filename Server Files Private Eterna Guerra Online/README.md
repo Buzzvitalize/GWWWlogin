@@ -53,9 +53,28 @@ DB_CONNECTION_STRING=
 API_PORT=8080
 WORLD_IP=127.0.0.1
 WORLD_PORT=5999
+GAME_SERVER_IP=127.0.0.1
+GAME_SERVER_PORT=7000
 ```
 
 > En `trusted`, `DB_USER`/`DB_PASSWORD` no se usan para conectar; se usa tu sesión Windows.
+
+## Compatibilidad con configuración LoginServer/GameServer (referencia externa)
+
+Si estás siguiendo una configuración tipo:
+
+- LoginServer: `127.0.0.1:5999`
+- GameServer: `127.0.0.1:7000`
+
+ajusta en `api/.env`:
+
+- `WORLD_IP=127.0.0.1`
+- `WORLD_PORT=5999`
+- `GAME_SERVER_IP=127.0.0.1`
+- `GAME_SERVER_PORT=7000`
+- `EMULATOR_PORTS=5999,7000,6000,29000`
+
+> En este repo la BD actual sigue siendo SQL Server (no MySQL) y no se usa Redis en el flujo base.
 
 ## 3) Encendido rápido (Windows)
 
@@ -137,6 +156,13 @@ Cuando ves esto:
 significa que **sí conecta por TCP**, pero el cliente rechaza la respuesta de protocolo y cierra.
 No es un problema de IP/puerto, es de **handshake binario**.
 
+Si en log ves `RECV len=140` y después `SEND len=4` + `DISCONNECT`, significa que el cliente sí llega al LoginServer pero rechaza el ACK corto (4 bytes) para ese paquete.
+En ese caso prueba temporalmente:
+
+- `EMULATOR_BINARY_REPLY_MODE=echo`
+
+y vuelve a capturar `logs/world_emulator_packets.log` para aproximar la respuesta real esperada por el cliente.
+
 Por eso ahora el default recomendado en `.env` es:
 
 - `EMULATOR_MODE=hybrid`
@@ -150,6 +176,7 @@ Por eso ahora el default recomendado en `.env` es:
 - `GET http://127.0.0.1:8080/health`
 - `GET http://127.0.0.1:8080/db/config`
 - `GET http://127.0.0.1:8080/emulator/status`
+- `GET http://127.0.0.1:8080/directory/regions`
 
 Para pruebas correctas, debe aparecer `"message": "Sistema Online"`.
 
