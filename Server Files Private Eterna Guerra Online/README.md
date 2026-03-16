@@ -192,7 +192,7 @@ Se ajustó el emulador para escuchar múltiples puertos en paralelo:
 
 Y para escribir log en ruta absoluta por defecto:
 
-- `Server Files Private Eterna Guerra Online/logs/world_emulator_packets.log`
+- `logs/world_emulator_packets.log`
 
 Pasos recomendados:
 
@@ -220,3 +220,6 @@ Config clave:
 - `EMULATOR_UDP_REPLY_HEX=47 57 68 7C`
 
 Con esto, aunque el cliente no inicie TCP al principio, verás `UDP_RECV`/`UDP_SEND` en el log.
+
+
+Nota: Si en tu `.env` pusiste `Server Files Private Eterna Guerra Online/logs/...`, ahora el emulador lo normaliza para no duplicar ruta. Aun así, se recomienda dejarlo como `logs/world_emulator_packets.log`.

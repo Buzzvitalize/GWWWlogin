@@ -5,9 +5,17 @@ from collections import Counter, defaultdict
 from pathlib import Path
 import re
 
-LOG = Path('Server Files Private Eterna Guerra Online/logs/world_emulator_packets.log')
-if not LOG.exists():
-    LOG = Path('logs/world_emulator_packets.log')
+ROOT = Path('Server Files Private Eterna Guerra Online')
+CANDIDATES = [
+    ROOT / 'logs' / 'world_emulator_packets.log',
+    Path('logs/world_emulator_packets.log'),
+]
+
+LOG = CANDIDATES[0]
+for c in CANDIDATES:
+    if c.exists():
+        LOG = c
+        break
 
 EVENTS = {
     'CONNECT', 'SEND_HELLO', 'RECV', 'SEND', 'DISCONNECT', 'KEEPALIVE',

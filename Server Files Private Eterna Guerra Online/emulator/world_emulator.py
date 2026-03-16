@@ -37,10 +37,23 @@ ENABLE_UDP = os.getenv("EMULATOR_ENABLE_UDP", "1") == "1"
 UDP_REPLY_HEX = os.getenv("EMULATOR_UDP_REPLY_HEX", "47 57 68 7C")
 
 LOG_PACKETS = os.getenv("EMULATOR_LOG_PACKETS", "1") == "1"
-log_raw = os.getenv("EMULATOR_LOG_FILE", str(ROOT_DIR / "logs" / "world_emulator_packets.log"))
-LOG_FILE = Path(log_raw)
-if not LOG_FILE.is_absolute():
-    LOG_FILE = ROOT_DIR / LOG_FILE
+log_raw = os.getenv("EMULATOR_LOG_FILE", "logs/world_emulator_packets.log")
+
+
+def resolve_log_path(raw: str) -> Path:
+    p = Path(raw)
+    if p.is_absolute():
+        return p
+
+    # Si viene con prefijo redundante "Server Files Private Eterna Guerra Online/..."
+    # lo recortamos para evitar duplicar ROOT_DIR en el join final.
+    if p.parts and p.parts[0] == ROOT_DIR.name:
+        p = Path(*p.parts[1:])
+
+    return ROOT_DIR / p
+
+
+LOG_FILE = resolve_log_path(log_raw)
 
 SEND_HELLO_ON_CONNECT = os.getenv("EMULATOR_SEND_HELLO_ON_CONNECT", "1") == "1"
 HELLO_TEXT = os.getenv("EMULATOR_HELLO_TEXT", "SYSTEM_ONLINE\\n")
