@@ -122,6 +122,27 @@ Luego puedes consultar:
 
 - `GET http://127.0.0.1:8080/localization/en-us/login-bundle`
 
+
+### Lectura de tu log actual (qué significa)
+
+Cuando ves esto:
+
+- `CONNECT ...`
+- `RECV ... len=140 ...`
+- `SEND ... len=140` (echo)
+- `DISCONNECT`
+
+significa que **sí conecta por TCP**, pero el cliente rechaza la respuesta de protocolo y cierra.
+No es un problema de IP/puerto, es de **handshake binario**.
+
+Por eso ahora el default recomendado en `.env` es:
+
+- `EMULATOR_MODE=hybrid`
+- `EMULATOR_BINARY_REPLY_MODE=ack`
+- `EMULATOR_BINARY_REPLY_HEX=47 57 68 7C`
+
+(antes estaba respondiendo eco para binario y eso normalmente falla en cliente legacy).
+
 ## 4) Validación de estado online
 
 - `GET http://127.0.0.1:8080/health`

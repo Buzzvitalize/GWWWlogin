@@ -10,6 +10,8 @@ from pathlib import Path
 WORLD_HOST = os.getenv("WORLD_IP", "127.0.0.1")
 WORLD_PORT = int(os.getenv("WORLD_PORT", "5999"))
 EMULATOR_MODE = os.getenv("EMULATOR_MODE", "hybrid")  # hybrid | echo | text
+BINARY_REPLY_MODE = os.getenv("EMULATOR_BINARY_REPLY_MODE", "ack")  # ack | echo
+BINARY_REPLY_HEX = os.getenv("EMULATOR_BINARY_REPLY_HEX", "47 57 68 7C")
 LOG_PACKETS = os.getenv("EMULATOR_LOG_PACKETS", "1") == "1"
 LOG_FILE = Path(os.getenv("EMULATOR_LOG_FILE", "logs/world_emulator_packets.log"))
 
@@ -45,6 +47,13 @@ def parse_hex_sequence(raw: str) -> list[bytes]:
     return out
 
 
+def binary_reply_payload() -> bytes:
+    payloads = parse_hex_sequence(BINARY_REPLY_HEX)
+    if not payloads:
+        return b""
+    return payloads[0]
+
+
 def send_initial_hello(sock: socket.socket, client: str) -> None:
     if not SEND_HELLO_ON_CONNECT:
         return
@@ -55,9 +64,8 @@ def send_initial_hello(sock: socket.socket, client: str) -> None:
         # echo puro: no enviamos saludo inicial por defecto
         payloads = parse_hex_sequence(HELLO_SEQUENCE_HEX)
     else:
-        # hybrid: intentamos saludo binario + saludo texto
+                # hybrid: por defecto solo saludo binario (más seguro para cliente legacy)
         payloads = parse_hex_sequence(HELLO_SEQUENCE_HEX)
-        payloads.append(HELLO_TEXT.encode("utf-8", errors="ignore"))
 
     for payload in payloads:
         if not payload:
@@ -99,18 +107,21 @@ class WorldHandler(socketserver.BaseRequestHandler):
                 elif EMULATOR_MODE == "text":
                     reply = HELLO_TEXT.encode("utf-8", errors="ignore")
                 else:
-                    # hybrid: si parece texto, responde texto; si no, eco binario
+                    # hybrid: si parece texto, responde texto; si es binario usa ACK configurable
                     try:
                         text = data.decode("utf-8")
                         if all((31 < ord(ch) < 127) or ch in "\r\n\t" for ch in text):
                             reply = HELLO_TEXT.encode("utf-8", errors="ignore")
                         else:
-                            reply = data
+                            reply = data if BINARY_REPLY_MODE == "echo" else binary_reply_payload()
                     except UnicodeDecodeError:
-                        reply = data
+                        reply = data if BINARY_REPLY_MODE == "echo" else binary_reply_payload()
 
-                self.request.sendall(reply)
-                append_log(f"[{stamp}] SEND {client} len={len(reply)}")
+                if reply:
+                    self.request.sendall(reply)
+                    append_log(f"[{stamp}] SEND {client} len={len(reply)}")
+                else:
+                    append_log(f"[{stamp}] SEND_SKIP_EMPTY {client}")
             except socket.timeout:
                 keep = b"\x00"
                 try:
@@ -133,7 +144,7 @@ def main() -> None:
         print(f"World Emulator ONLINE on {WORLD_HOST}:{WORLD_PORT}")
         print(
             f"Estado: Sistema Online | mode={EMULATOR_MODE} | "
-            f"hello={SEND_HELLO_ON_CONNECT} | log={LOG_FILE}"
+            f"hello={SEND_HELLO_ON_CONNECT} | binary_reply={BINARY_REPLY_MODE} | log={LOG_FILE}"
         )
         server.serve_forever()
 
