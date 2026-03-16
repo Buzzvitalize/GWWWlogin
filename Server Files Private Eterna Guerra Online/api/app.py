@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import socket
 from typing import Any
 
 import pyodbc
@@ -97,6 +98,25 @@ def access_token_to_guid(access_token: str) -> str:
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+def is_world_online(host: str, port: int, timeout_s: float = 1.0) -> bool:
+    try:
+        with socket.create_connection((host, port), timeout=timeout_s):
+            return True
+    except OSError:
+        return False
+
+
+@app.get("/emulator/status")
+def emulator_status() -> dict[str, str | int | bool]:
+    online = is_world_online(WORLD_IP, WORLD_PORT)
+    return {
+        "world_ip": WORLD_IP,
+        "world_port": WORLD_PORT,
+        "online": online,
+        "message": "Sistema Online" if online else "Sistema Offline",
+    }
 
 
 @app.post("/auth/register")
@@ -262,6 +282,9 @@ def enter_world(authorization: str | None = Header(default=None)) -> EnterWorldR
 
     if row is None:
         raise HTTPException(status_code=400, detail="NO_ACTIVE_CHARACTER")
+
+    if not is_world_online(WORLD_IP, WORLD_PORT):
+        raise HTTPException(status_code=503, detail="WORLD_EMULATOR_OFFLINE")
 
     return EnterWorldResponse(
         world_ip=WORLD_IP,

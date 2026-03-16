@@ -1,6 +1,6 @@
 # Server Files Private Eterna Guerra Online
 
-Implementación base de **login + creación de personaje + entrada al mundo** conectada a **SQL Server 2025**.
+Implementación base de **Login Emulator + Game Emulator** para pruebas locales en `127.0.0.1:5999`.
 
 ## Estructura
 
@@ -9,9 +9,9 @@ Implementación base de **login + creación de personaje + entrada al mundo** co
 - `sql/03_seed_demo.sql`: usuario demo inicial.
 - `sql/04_gameplay_schema.sql`: tabla de personajes y relación con sesión.
 - `sql/05_gameplay_procedures.sql`: SP de register/create/select character.
-- `api/app.py`: API FastAPI (`/auth`, `/characters`, `/session/enter-world`).
-- `api/requirements.txt`: dependencias Python.
-- `api/.env.example`: variables de entorno.
+- `api/app.py`: API FastAPI (`/auth`, `/characters`, `/session/enter-world`, `/emulator/status`).
+- `emulator/world_emulator.py`: world emulator TCP simple que responde `SYSTEM_ONLINE`.
+- `scripts/start_world_emulator.sh` / `.bat`: arranque rápido del game emulator.
 
 ## 1) Preparar SQL Server 2025
 
@@ -23,7 +23,38 @@ Ejecuta en orden:
 4. `sql/04_gameplay_schema.sql`
 5. `sql/05_gameplay_procedures.sql`
 
-## 2) Levantar API
+## 2) Configurar entorno local
+
+En `api/.env` (copiando de `.env.example`):
+
+```env
+DB_CONNECTION_STRING=DRIVER={ODBC Driver 18 for SQL Server};SERVER=localhost,1433;DATABASE=EternaGuerraAuth;UID=sa;PWD=YourStrong!Passw0rd;Encrypt=no;TrustServerCertificate=yes;
+API_PORT=8080
+WORLD_IP=127.0.0.1
+WORLD_PORT=5999
+```
+
+## 3) Ejecutar emuladores paso por paso
+
+### Paso A: levantar Game Emulator
+
+Linux/macOS:
+
+```bash
+cd "Server Files Private Eterna Guerra Online"
+./scripts/start_world_emulator.sh
+```
+
+Windows:
+
+```bat
+cd "Server Files Private Eterna Guerra Online"
+scripts\start_world_emulator.bat
+```
+
+Cuando esté correcto verás en consola: `Estado: Sistema Online`.
+
+### Paso B: levantar Login Emulator / API
 
 ```bash
 cd "Server Files Private Eterna Guerra Online/api"
@@ -34,16 +65,21 @@ cp .env.example .env
 uvicorn app:app --host 0.0.0.0 --port 8080
 ```
 
-## 3) Configuración `.env`
+## 4) Validación de estado online
 
-```env
-DB_CONNECTION_STRING=DRIVER={ODBC Driver 18 for SQL Server};SERVER=localhost,1433;DATABASE=EternaGuerraAuth;UID=sa;PWD=YourStrong!Passw0rd;Encrypt=no;TrustServerCertificate=yes;
-API_PORT=8080
-WORLD_IP=127.0.0.1
-WORLD_PORT=5999
+- `GET http://127.0.0.1:8080/health`
+- `GET http://127.0.0.1:8080/emulator/status`
+
+La respuesta esperada del segundo endpoint incluye:
+
+```json
+{
+  "online": true,
+  "message": "Sistema Online"
+}
 ```
 
-## 4) Flujo real para entrar
+## 5) Flujo completo para entrar
 
 ### A) Registro (opcional)
 
@@ -61,44 +97,24 @@ WORLD_PORT=5999
 
 ### B) Login
 
-`POST /auth/login`
-
-```json
-{
-  "username": "admin",
-  "password": "Admin123*",
-  "region": 11,
-  "locale": "en_us",
-  "client_version": "gw_setup_2.48.001_usa"
-}
-```
-
-Guarda `access_token`.
+`POST /auth/login` (usa `admin / Admin123*` si corriste el seed)
 
 ### C) Crear personaje
 
-`POST /characters` con header `Authorization: Bearer <access_token>`
-
-```json
-{
-  "character_name": "AresOne",
-  "class_code": "Warrior",
-  "faction": "Athens"
-}
-```
+`POST /characters` con `Authorization: Bearer <access_token>`
 
 ### D) Seleccionar personaje
 
-`POST /characters/{character_id}/select` con el mismo Bearer token.
+`POST /characters/{character_id}/select`
 
 ### E) Entrar al mundo
 
-`POST /session/enter-world` con el mismo Bearer token.
+`POST /session/enter-world`
 
-Responde IP/puerto del world server + personaje activo.
+> Si el Game Emulator está apagado, este paso devuelve `WORLD_EMULATOR_OFFLINE`.
 
 ## Notas
 
 - Password hash en SQL con `HASHBYTES('SHA2_256', salt + ':' + password)`.
 - Límite por cuenta: máximo 3 personajes.
-- Si quieres conectar esto al launcher/UI Blueprint, usa estos endpoints en ese orden.
+- Todo está orientado a **emulación local** y pruebas, no a producción oficial.
