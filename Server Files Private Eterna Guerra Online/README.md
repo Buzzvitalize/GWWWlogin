@@ -2,6 +2,16 @@
 
 Implementación base de **Login Emulator + Game Emulator** para pruebas locales en `127.0.0.1:5999`.
 
+## Objetivo de esta versión
+
+Queda adaptado para tu escenario local:
+
+- **SQL Server**: `localhost\SQLEXPRESS`
+- **Usuario**: `ECOSEA-DO\SQLEXPRESS`
+- **Sin contraseña** (autenticación integrada de Windows / trusted connection)
+
+Y mantiene opción editable para cambiar a SQL Auth o otro server en el futuro.
+
 ## Estructura
 
 - `sql/01_create_database.sql`: crea BD, cuentas y sesiones.
@@ -9,9 +19,11 @@ Implementación base de **Login Emulator + Game Emulator** para pruebas locales 
 - `sql/03_seed_demo.sql`: usuario demo inicial.
 - `sql/04_gameplay_schema.sql`: tabla de personajes y relación con sesión.
 - `sql/05_gameplay_procedures.sql`: SP de register/create/select character.
-- `api/app.py`: API FastAPI (`/auth`, `/characters`, `/session/enter-world`, `/emulator/status`).
+- `api/app.py`: API FastAPI (`/auth`, `/characters`, `/session/enter-world`, `/emulator/status`, `/db/config`).
+- `api/.env.example`: configuración local y futura.
 - `emulator/world_emulator.py`: world emulator TCP simple que responde `SYSTEM_ONLINE`.
-- `scripts/start_world_emulator.sh` / `.bat`: arranque rápido del game emulator.
+- `scripts/start_world_emulator.sh` / `.bat`: arranque del game emulator.
+- `scripts/start_local_stack.bat`: arranque todo-en-uno para Windows.
 
 ## 1) Preparar SQL Server 2025
 
@@ -25,75 +37,48 @@ Ejecuta en orden:
 
 ## 2) Configurar entorno local
 
-En `api/.env` (copiando de `.env.example`):
+Copia `api/.env.example` a `api/.env` y deja por defecto:
 
 ```env
-DB_CONNECTION_STRING=DRIVER={ODBC Driver 18 for SQL Server};SERVER=localhost,1433;DATABASE=EternaGuerraAuth;UID=sa;PWD=YourStrong!Passw0rd;Encrypt=no;TrustServerCertificate=yes;
+DB_SERVER=localhost\SQLEXPRESS
+DB_NAME=EternaGuerraAuth
+DB_AUTH_MODE=trusted
+DB_USER=ECOSEA-DO\SQLEXPRESS
+DB_PASSWORD=
+DB_DRIVER=ODBC Driver 18 for SQL Server
+DB_CONNECTION_STRING=
 API_PORT=8080
 WORLD_IP=127.0.0.1
 WORLD_PORT=5999
 ```
 
-## 3) Ejecutar emuladores paso por paso
+> En `trusted`, `DB_USER`/`DB_PASSWORD` no se usan para conectar; se usa tu sesión Windows.
 
-### Paso A: levantar Game Emulator
-
-Linux/macOS:
-
-```bash
-cd "Server Files Private Eterna Guerra Online"
-./scripts/start_world_emulator.sh
-```
-
-Windows:
+## 3) Encendido rápido (Windows)
 
 ```bat
 cd "Server Files Private Eterna Guerra Online"
-scripts\start_world_emulator.bat
+scripts\start_local_stack.bat
 ```
 
-Cuando esté correcto verás en consola: `Estado: Sistema Online`.
+Esto abre:
 
-### Paso B: levantar Login Emulator / API
-
-```bash
-cd "Server Files Private Eterna Guerra Online/api"
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-uvicorn app:app --host 0.0.0.0 --port 8080
-```
+1. Game Emulator (`127.0.0.1:5999`)
+2. Login/API (`127.0.0.1:8080`)
 
 ## 4) Validación de estado online
 
 - `GET http://127.0.0.1:8080/health`
+- `GET http://127.0.0.1:8080/db/config`
 - `GET http://127.0.0.1:8080/emulator/status`
 
-La respuesta esperada del segundo endpoint incluye:
-
-```json
-{
-  "online": true,
-  "message": "Sistema Online"
-}
-```
+Para pruebas correctas, debe aparecer `"message": "Sistema Online"`.
 
 ## 5) Flujo completo para entrar
 
 ### A) Registro (opcional)
 
 `POST /auth/register`
-
-```json
-{
-  "username": "admin2",
-  "password": "Admin123*",
-  "nickname": "AdminTwo",
-  "region": 11,
-  "locale": "en_us"
-}
-```
 
 ### B) Login
 
@@ -111,7 +96,7 @@ La respuesta esperada del segundo endpoint incluye:
 
 `POST /session/enter-world`
 
-> Si el Game Emulator está apagado, este paso devuelve `WORLD_EMULATOR_OFFLINE`.
+> Si el Game Emulator está apagado, devuelve `WORLD_EMULATOR_OFFLINE`.
 
 ## Notas
 

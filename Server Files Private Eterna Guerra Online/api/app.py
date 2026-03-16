@@ -11,11 +11,18 @@ from pydantic import BaseModel, Field
 
 load_dotenv()
 
-DB_CONNECTION_STRING = os.getenv("DB_CONNECTION_STRING", "")
+DB_CONNECTION_STRING = os.getenv("DB_CONNECTION_STRING", "").strip()
+DB_DRIVER = os.getenv("DB_DRIVER", "ODBC Driver 18 for SQL Server")
+DB_SERVER = os.getenv("DB_SERVER", r"localhost\SQLEXPRESS")
+DB_NAME = os.getenv("DB_NAME", "EternaGuerraAuth")
+DB_AUTH_MODE = os.getenv("DB_AUTH_MODE", "trusted").lower().strip()  # trusted | sql
+DB_USER = os.getenv("DB_USER", r"ECOSEA-DO\SQLEXPRESS")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "")
+
 WORLD_IP = os.getenv("WORLD_IP", "127.0.0.1")
 WORLD_PORT = int(os.getenv("WORLD_PORT", "5999"))
 
-app = FastAPI(title="Eterna Guerra Login/Game API", version="2.0.0")
+app = FastAPI(title="Eterna Guerra Login/Game API", version="2.1.0")
 
 
 class RegisterRequest(BaseModel):
@@ -66,10 +73,26 @@ class EnterWorldResponse(BaseModel):
     map_code: str
 
 
+def build_connection_string() -> str:
+    if DB_CONNECTION_STRING:
+        return DB_CONNECTION_STRING
+
+    base = (
+        f"DRIVER={{{DB_DRIVER}}};"
+        f"SERVER={DB_SERVER};"
+        f"DATABASE={DB_NAME};"
+        "Encrypt=no;TrustServerCertificate=yes;"
+    )
+
+    if DB_AUTH_MODE == "sql":
+        return f"{base}UID={DB_USER};PWD={DB_PASSWORD};"
+
+    return f"{base}Trusted_Connection=yes;"
+
+
 def get_conn() -> pyodbc.Connection:
-    if not DB_CONNECTION_STRING:
-        raise RuntimeError("DB_CONNECTION_STRING no configurado")
-    return pyodbc.connect(DB_CONNECTION_STRING, timeout=5)
+    conn_str = build_connection_string()
+    return pyodbc.connect(conn_str, timeout=5)
 
 
 def fetch_one_dict(cursor: pyodbc.Cursor) -> dict[str, Any]:
@@ -98,6 +121,15 @@ def access_token_to_guid(access_token: str) -> str:
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/db/config")
+def db_config() -> dict[str, str]:
+    return {
+        "server": DB_SERVER,
+        "database": DB_NAME,
+        "auth_mode": DB_AUTH_MODE,
+    }
 
 
 def is_world_online(host: str, port: int, timeout_s: float = 1.0) -> bool:
@@ -158,8 +190,6 @@ def login(payload: LoginRequest) -> LoginResponse:
             result = fetch_one_dict(cursor)
     except pyodbc.Error as exc:
         raise HTTPException(status_code=500, detail=f"SQL_ERROR: {exc}") from exc
-    except RuntimeError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
     if not result.get("IsSuccess"):
         raise HTTPException(status_code=401, detail=result.get("ErrorCode", "INVALID_CREDENTIALS"))
