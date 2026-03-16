@@ -23,6 +23,8 @@ DB_PASSWORD = os.getenv("DB_PASSWORD", "")
 
 WORLD_IP = os.getenv("WORLD_IP", "127.0.0.1")
 WORLD_PORT = int(os.getenv("WORLD_PORT", "5999"))
+GAME_SERVER_IP = os.getenv("GAME_SERVER_IP", WORLD_IP)
+GAME_SERVER_PORT = int(os.getenv("GAME_SERVER_PORT", "7000"))
 
 app = FastAPI(title="Eterna Guerra Login/Game API", version="2.2.0")
 
@@ -33,6 +35,40 @@ def load_login_bundle() -> dict[str, Any]:
     if not BUNDLE_FILE.exists():
         return {"locale": "en_us", "login_copy": {}, "error_messages": {}}
     return json.loads(BUNDLE_FILE.read_text(encoding="utf-8"))
+
+
+def load_region_server_directory() -> list[dict[str, Any]]:
+    raw = os.getenv("REGION_SERVER_DIRECTORY_JSON", "").strip()
+    if raw:
+        try:
+            parsed = json.loads(raw)
+            if isinstance(parsed, list):
+                return parsed
+        except json.JSONDecodeError:
+            pass
+
+    return [
+        {
+            "region_id": 1,
+            "region_name": "USA",
+            "server_id": 1,
+            "server_name": "Eterno",
+            "login_host": WORLD_IP,
+            "login_port": WORLD_PORT,
+            "game_host": GAME_SERVER_IP,
+            "game_port": GAME_SERVER_PORT,
+        },
+        {
+            "region_id": 2,
+            "region_name": "Latino America",
+            "server_id": 2,
+            "server_name": "Casdin",
+            "login_host": WORLD_IP,
+            "login_port": WORLD_PORT,
+            "game_host": GAME_SERVER_IP,
+            "game_port": GAME_SERVER_PORT,
+        },
+    ]
 
 
 
@@ -79,9 +115,22 @@ class CharacterResponse(BaseModel):
 class EnterWorldResponse(BaseModel):
     world_ip: str
     world_port: int
+    game_server_ip: str
+    game_server_port: int
     character_id: int
     character_name: str
     map_code: str
+
+
+class RegionServerEntry(BaseModel):
+    region_id: int
+    region_name: str
+    server_id: int
+    server_name: str
+    login_host: str
+    login_port: int
+    game_host: str
+    game_port: int
 
 
 def build_connection_string() -> str:
@@ -159,13 +208,23 @@ def localization_login_bundle() -> dict[str, Any]:
 
 @app.get("/emulator/status")
 def emulator_status() -> dict[str, str | int | bool]:
-    online = is_world_online(WORLD_IP, WORLD_PORT)
+    online_login = is_world_online(WORLD_IP, WORLD_PORT)
+    online_game = is_world_online(GAME_SERVER_IP, GAME_SERVER_PORT)
     return {
         "world_ip": WORLD_IP,
         "world_port": WORLD_PORT,
-        "online": online,
-        "message": "Sistema Online" if online else "Sistema Offline",
+        "game_server_ip": GAME_SERVER_IP,
+        "game_server_port": GAME_SERVER_PORT,
+        "online": online_login and online_game,
+        "login_online": online_login,
+        "game_online": online_game,
+        "message": "Sistema Online" if (online_login and online_game) else "Sistema Offline",
     }
+
+
+@app.get("/directory/regions", response_model=list[RegionServerEntry])
+def list_region_servers() -> list[RegionServerEntry]:
+    return [RegionServerEntry(**item) for item in load_region_server_directory()]
 
 
 @app.post("/auth/register")
@@ -336,6 +395,8 @@ def enter_world(authorization: str | None = Header(default=None)) -> EnterWorldR
     return EnterWorldResponse(
         world_ip=WORLD_IP,
         world_port=WORLD_PORT,
+        game_server_ip=GAME_SERVER_IP,
+        game_server_port=GAME_SERVER_PORT,
         character_id=int(row[0]),
         character_name=row[1],
         map_code=row[2],

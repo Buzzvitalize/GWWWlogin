@@ -25,7 +25,8 @@ Y mantiene opción editable para cambiar a SQL Auth o otro server en el futuro.
 - `scripts/start_world_emulator.sh` / `.bat`: arranque del game emulator.
 - `api/assets/en_us_login_bundle.json`: bundle de textos/login+errores tomado del cliente legacy.
 - `tools/build_en_us_login_bundle.py`: regenera el bundle desde `Localization/en_us/Text`.
-- `scripts/start_local_stack.bat`: arranque todo-en-uno para Windows.
+- `scripts/start_local_stack.bat`: arranque todo-en-uno para Windows (incluye sync automático de `Eterna Guerra Online/config.ini`).
+- `../tools/sync_client_server_config.py`: sincroniza `WORLD_IP/WORLD_PORT` (`api/.env`) hacia `Eterna Guerra Online/config.ini`.
 
 ## 1) Preparar SQL Server 2025
 
@@ -52,9 +53,40 @@ DB_CONNECTION_STRING=
 API_PORT=8080
 WORLD_IP=127.0.0.1
 WORLD_PORT=5999
+GAME_SERVER_IP=127.0.0.1
+GAME_SERVER_PORT=7000
 ```
 
 > En `trusted`, `DB_USER`/`DB_PASSWORD` no se usan para conectar; se usa tu sesión Windows.
+
+## Compatibilidad con configuración LoginServer/GameServer (referencia externa)
+
+Si estás siguiendo una configuración tipo:
+
+- LoginServer: `127.0.0.1:5999`
+- GameServer: `127.0.0.1:7000`
+
+ajusta en `api/.env`:
+
+- `WORLD_IP=127.0.0.1`
+- `WORLD_PORT=5999`
+- `GAME_SERVER_IP=127.0.0.1`
+- `GAME_SERVER_PORT=7000`
+- `EMULATOR_PORTS=5999,7000,6000,29000`
+
+> En este repo la BD actual sigue siendo SQL Server (no MySQL) y no se usa Redis en el flujo base.
+
+## Orden del flujo en este cliente (confirmado en archivos del cliente)
+
+En `Localization/en_us/UI/XML/LoginUI.xml` la pantalla principal después de autenticar es `SelectServerWin` (ID `190017`) con lista `SvrContent` (ID `190019`) y botón `MoreServerBtn` (ID `190033`).
+
+Esto indica que el orden práctico es:
+
+1. Login
+2. Selección de servidor recomendado
+3. (Opcional) `More Servers` para abrir selector extendido (normalmente por región/realm)
+
+No aparece una pantalla de región independiente *antes* del primer listado; la región parece estar dentro del flujo de "More Servers" y datos que llegan por protocolo socket del login.
 
 ## 3) Encendido rápido (Windows)
 
@@ -65,8 +97,9 @@ scripts\start_local_stack.bat
 
 Esto abre:
 
-1. Game Emulator (`127.0.0.1:5999`)
-2. Login/API (`127.0.0.1:8080`)
+1. Sync de `Eterna Guerra Online/config.ini` con `WORLD_IP/WORLD_PORT`
+2. Game Emulator (`127.0.0.1:5999`)
+3. Login/API (`127.0.0.1:8080`)
 
 
 ### Solución si antes fallaba el World Emulator
@@ -135,19 +168,27 @@ Cuando ves esto:
 significa que **sí conecta por TCP**, pero el cliente rechaza la respuesta de protocolo y cierra.
 No es un problema de IP/puerto, es de **handshake binario**.
 
+Si en log ves `RECV len=140` y después `SEND len=4` + `DISCONNECT`, significa que el cliente sí llega al LoginServer pero rechaza el ACK corto (4 bytes) para ese paquete.
+En ese caso prueba temporalmente:
+
+- `EMULATOR_BINARY_REPLY_MODE=echo`
+
+y vuelve a capturar `logs/world_emulator_packets.log` para aproximar la respuesta real esperada por el cliente.
+
 Por eso ahora el default recomendado en `.env` es:
 
 - `EMULATOR_MODE=hybrid`
-- `EMULATOR_BINARY_REPLY_MODE=ack`
+- `EMULATOR_BINARY_REPLY_MODE=mirror_first`
 - `EMULATOR_BINARY_REPLY_HEX=47 57 68 7C`
 
-(antes estaba respondiendo eco para binario y eso normalmente falla en cliente legacy).
+`mirror_first` devuelve el **primer paquete binario tal cual (mirror)** y luego usa ACK hex. Esto ayuda justo en casos como tu log (`RECV len=140` y desconexión rápida).
 
 ## 4) Validación de estado online
 
 - `GET http://127.0.0.1:8080/health`
 - `GET http://127.0.0.1:8080/db/config`
 - `GET http://127.0.0.1:8080/emulator/status`
+- `GET http://127.0.0.1:8080/directory/regions`
 
 Para pruebas correctas, debe aparecer `"message": "Sistema Online"`.
 

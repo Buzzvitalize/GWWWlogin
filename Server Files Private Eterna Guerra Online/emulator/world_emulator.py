@@ -27,10 +27,11 @@ load_env_file(ROOT_DIR / "api" / ".env.example")
 
 WORLD_HOST = os.getenv("WORLD_IP", "127.0.0.1")
 WORLD_PORT = int(os.getenv("WORLD_PORT", "5999"))
-EMULATOR_PORTS = os.getenv("EMULATOR_PORTS", f"{WORLD_PORT},6000,29000")
+GAME_SERVER_PORT = int(os.getenv("GAME_SERVER_PORT", "7000"))
+EMULATOR_PORTS = os.getenv("EMULATOR_PORTS", f"{WORLD_PORT},{GAME_SERVER_PORT},6000,29000")
 
 EMULATOR_MODE = os.getenv("EMULATOR_MODE", "hybrid")  # hybrid | echo | text
-BINARY_REPLY_MODE = os.getenv("EMULATOR_BINARY_REPLY_MODE", "ack")  # ack | echo
+BINARY_REPLY_MODE = os.getenv("EMULATOR_BINARY_REPLY_MODE", "mirror_first")  # mirror_first | ack | echo
 BINARY_REPLY_HEX = os.getenv("EMULATOR_BINARY_REPLY_HEX", "47 57 68 7C")
 
 ENABLE_UDP = os.getenv("EMULATOR_ENABLE_UDP", "1") == "1"
@@ -130,6 +131,7 @@ class WorldHandler(socketserver.BaseRequestHandler):
         print(f"[{now_utc()}] Cliente conectado: {client} -> local:{listen_port}")
 
         self.request.settimeout(10.0)
+        binary_packets = 0
         try:
             send_initial_hello(self.request, client, listen_port)
         except OSError:
@@ -155,9 +157,21 @@ class WorldHandler(socketserver.BaseRequestHandler):
                         if all((31 < ord(ch) < 127) or ch in "\r\n\t" for ch in text):
                             reply = HELLO_TEXT.encode("utf-8", errors="ignore")
                         else:
-                            reply = data if BINARY_REPLY_MODE == "echo" else pick_payload(BINARY_REPLY_HEX)
+                            if BINARY_REPLY_MODE == "echo":
+                                reply = data
+                            elif BINARY_REPLY_MODE == "mirror_first" and binary_packets == 0:
+                                reply = data
+                            else:
+                                reply = pick_payload(BINARY_REPLY_HEX)
+                            binary_packets += 1
                     except UnicodeDecodeError:
-                        reply = data if BINARY_REPLY_MODE == "echo" else pick_payload(BINARY_REPLY_HEX)
+                        if BINARY_REPLY_MODE == "echo":
+                            reply = data
+                        elif BINARY_REPLY_MODE == "mirror_first" and binary_packets == 0:
+                            reply = data
+                        else:
+                            reply = pick_payload(BINARY_REPLY_HEX)
+                        binary_packets += 1
 
                 if reply:
                     self.request.sendall(reply)
