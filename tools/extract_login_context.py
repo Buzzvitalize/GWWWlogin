@@ -2,6 +2,7 @@
 """Extrae contexto de login desde assets legacy de GodsWar."""
 from __future__ import annotations
 
+import configparser
 import json
 from pathlib import Path
 
@@ -24,20 +25,27 @@ def parse_tab_dat(path: Path) -> dict[str, str]:
     return data
 
 
+def parse_server_defaults(config_path: Path) -> dict[str, str | int]:
+    parser = configparser.ConfigParser()
+    parser.read(config_path, encoding="utf-8")
+    return {
+        "ip": parser.get("SERVER", "IP", fallback="127.0.0.1"),
+        "port": parser.getint("SERVER", "PORT", fallback=5999),
+        "region": parser.getint("SYSTEM", "Region", fallback=11),
+        "locale": parser.get("SYSTEM", "Locals", fallback="en_us"),
+    }
+
+
 def main() -> None:
     login_info = parse_tab_dat(TEXT_DIR / "LoginInfo.dat")
+    config_path = GAME_DIR / "config.ini"
 
     payload = {
         "source": {
-            "config": str((GAME_DIR / "config.ini").relative_to(ROOT)),
+            "config": str(config_path.relative_to(ROOT)),
             "login_info": str((TEXT_DIR / "LoginInfo.dat").relative_to(ROOT)),
         },
-        "server_defaults": {
-            "ip": "67.208.220.189",
-            "port": 5999,
-            "region": 11,
-            "locale": "en_us",
-        },
+        "server_defaults": parse_server_defaults(config_path),
         "copy_blocks": {
             "billboard": login_info.get("BillboardInfo", ""),
             "camp_athens": login_info.get("CampInfo1", ""),

@@ -4,7 +4,7 @@ Este documento baja a Blueprint la implementación de un login moderno sin tocar
 
 ## 1) Hallazgos del cliente legacy
 
-- El cliente tiene defaults de red en `config.ini`: `IP=67.208.220.189`, `PORT=5999`, `Region=11`, `Locals=en_us`.
+- El cliente tiene defaults de red en `config.ini`: `IP=127.0.0.1`, `PORT=5999`, `Region=11`, `Locals=en_us` para pruebas locales.
 - El archivo `Localization/en_us/Text/LoginInfo.dat` contiene textos para pantalla de login (billboard, facciones y clases), aunque el contenido actual está mayormente en chino.
 - Se generó `docs/login_context_en_us.json` para exponer esos textos en un formato consumible desde UI/servicios.
 
