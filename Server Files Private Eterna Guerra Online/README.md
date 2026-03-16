@@ -206,8 +206,18 @@ El script valida:
 - que `EMULATOR_BINARY_REPLY_MODE` esté en `scripted` o `mirror_first`
 - que exista `EMULATOR_PACKET_SCRIPT_FILE`
 - que `EMULATOR_PORTS` incluya `GAME_SERVER_PORT`
+- que existan los mapas críticos (`REQUIRED_MAP_CODES`)
 
 Si falla **solo** en `Protocol completeness`, significa que la parte de archivos/config está bien y lo pendiente es replicar respuestas binarias del protocolo legacy para lista de servidor/región.
+
+### Verificación de mapas (Athens/Sparta y demás)
+
+Para evitar que falle la entrada al mundo por contenido faltante:
+
+- Configura `REQUIRED_MAP_CODES` en `api/.env` (por default: `TerrAthens_Newbie,TerrAthens,Sparta_Newbie,Sparta`).
+- Consulta `GET /content/maps/required` para ver disponibilidad real de cada mapa.
+
+Si quieres validar más mapas, agrega los códigos en `REQUIRED_MAP_CODES` separados por coma.
 
 ## 4) Validación de estado online
 
@@ -215,6 +225,7 @@ Si falla **solo** en `Protocol completeness`, significa que la parte de archivos
 - `GET http://127.0.0.1:8080/db/config`
 - `GET http://127.0.0.1:8080/emulator/status`
 - `GET http://127.0.0.1:8080/directory/regions`
+- `GET http://127.0.0.1:8080/content/maps/required`
 
 Para pruebas correctas, debe aparecer `"message": "Sistema Online"`.
 
@@ -241,6 +252,7 @@ Para pruebas correctas, debe aparecer `"message": "Sistema Online"`.
 `POST /session/enter-world`
 
 > Si el Game Emulator está apagado, devuelve `WORLD_EMULATOR_OFFLINE`.
+> Si falta el mapa del personaje en cliente (`Map/*.hmp` o `Map/<map>/ <map>.ini`), devuelve `MAP_ASSET_MISSING:<MapCode>`.
 
 ## Notas
 

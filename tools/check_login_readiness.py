@@ -9,6 +9,7 @@ import configparser
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SERVER_ROOT = REPO_ROOT / "Server Files Private Eterna Guerra Online"
 CLIENT_ROOT = REPO_ROOT / "Eterna Guerra Online"
+MAP_ROOT = CLIENT_ROOT / "Map"
 
 
 @dataclass
@@ -84,6 +85,19 @@ def check_env_values(env: dict[str, str]) -> list[CheckResult]:
     ]
 
 
+
+
+def check_required_maps(env: dict[str, str]) -> list[CheckResult]:
+    required = [x.strip() for x in env.get("REQUIRED_MAP_CODES", "TerrAthens_Newbie,TerrAthens,Sparta_Newbie,Sparta").split(",") if x.strip()]
+    out: list[CheckResult] = []
+    for code in required:
+        hmp = MAP_ROOT / f"{code}.hmp"
+        ini = MAP_ROOT / code / f"{code}.ini"
+        exists = hmp.exists() or ini.exists()
+        detail = f"hmp={hmp.exists()} ini={ini.exists()}"
+        out.append(CheckResult(f"Map asset exists: {code}", exists, detail))
+    return out
+
 def protocol_notice() -> CheckResult:
     detail = (
         "Legacy client still needs exact proprietary socket packet flow for server-list/realm-list. "
@@ -98,6 +112,7 @@ def main() -> int:
     results.extend(check_required_files())
     results.append(check_client_config(env))
     results.extend(check_env_values(env))
+    results.extend(check_required_maps(env))
     results.append(protocol_notice())
 
     failed = 0
