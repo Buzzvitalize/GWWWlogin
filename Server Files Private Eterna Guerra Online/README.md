@@ -19,10 +19,12 @@ Y mantiene opción editable para cambiar a SQL Auth o otro server en el futuro.
 - `sql/03_seed_demo.sql`: usuario demo inicial.
 - `sql/04_gameplay_schema.sql`: tabla de personajes y relación con sesión.
 - `sql/05_gameplay_procedures.sql`: SP de register/create/select character.
-- `api/app.py`: API FastAPI (`/auth`, `/characters`, `/session/enter-world`, `/emulator/status`, `/db/config`).
+- `api/app.py`: API FastAPI (`/auth`, `/characters`, `/session/enter-world`, `/emulator/status`, `/db/config`, `/localization/en-us/login-bundle`).
 - `api/.env.example`: configuración local y futura.
 - `emulator/world_emulator.py`: world emulator TCP simple que responde `SYSTEM_ONLINE`.
 - `scripts/start_world_emulator.sh` / `.bat`: arranque del game emulator.
+- `api/assets/en_us_login_bundle.json`: bundle de textos/login+errores tomado del cliente legacy.
+- `tools/build_en_us_login_bundle.py`: regenera el bundle desde `Localization/en_us/Text`.
 - `scripts/start_local_stack.bat`: arranque todo-en-uno para Windows.
 
 ## 1) Preparar SQL Server 2025
@@ -91,6 +93,16 @@ Si sigue fallando:
 2. Inicia stack con `scripts\start_local_stack.bat`.
 3. Intenta login en cliente.
 4. Comparte `logs/world_emulator_packets.log` para ajustar handshake del emulador al protocolo real del cliente.
+
+## 3.5) Sincronizar textos reales del cliente (en_us)
+
+```bash
+python tools/build_en_us_login_bundle.py
+```
+
+Luego puedes consultar:
+
+- `GET http://127.0.0.1:8080/localization/en-us/login-bundle`
 
 ## 4) Validación de estado online
 

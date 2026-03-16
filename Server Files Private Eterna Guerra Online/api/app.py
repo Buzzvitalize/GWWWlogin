@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import json
 import os
 import socket
+from pathlib import Path
 from typing import Any
 
 import pyodbc
@@ -22,7 +24,16 @@ DB_PASSWORD = os.getenv("DB_PASSWORD", "")
 WORLD_IP = os.getenv("WORLD_IP", "127.0.0.1")
 WORLD_PORT = int(os.getenv("WORLD_PORT", "5999"))
 
-app = FastAPI(title="Eterna Guerra Login/Game API", version="2.1.0")
+app = FastAPI(title="Eterna Guerra Login/Game API", version="2.2.0")
+
+BUNDLE_FILE = Path(__file__).resolve().parent / "assets" / "en_us_login_bundle.json"
+
+
+def load_login_bundle() -> dict[str, Any]:
+    if not BUNDLE_FILE.exists():
+        return {"locale": "en_us", "login_copy": {}, "error_messages": {}}
+    return json.loads(BUNDLE_FILE.read_text(encoding="utf-8"))
+
 
 
 class RegisterRequest(BaseModel):
@@ -139,6 +150,12 @@ def is_world_online(host: str, port: int, timeout_s: float = 1.0) -> bool:
     except OSError:
         return False
 
+
+
+
+@app.get("/localization/en-us/login-bundle")
+def localization_login_bundle() -> dict[str, Any]:
+    return load_login_bundle()
 
 @app.get("/emulator/status")
 def emulator_status() -> dict[str, str | int | bool]:
