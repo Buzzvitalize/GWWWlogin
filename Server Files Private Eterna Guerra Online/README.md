@@ -66,6 +66,12 @@ Esto abre:
 1. Game Emulator (`127.0.0.1:5999`)
 2. Login/API (`127.0.0.1:8080`)
 
+
+### Solución si antes fallaba el World Emulator
+
+Se corrigió el `.bat` para evitar error de comillas y PATH (`El sistema no puede ejecutar el programa especificado`).
+Ahora usa rutas absolutas y prioriza `api\.venv\Scripts\python.exe`.
+
 ## 4) Validación de estado online
 
 - `GET http://127.0.0.1:8080/health`
