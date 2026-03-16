@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from pathlib import Path
 import configparser
 
@@ -98,6 +99,28 @@ def check_required_maps(env: dict[str, str]) -> list[CheckResult]:
         out.append(CheckResult(f"Map asset exists: {code}", exists, detail))
     return out
 
+
+
+def check_content_manifests() -> list[CheckResult]:
+    content_root = REPO_ROOT / "Server Files Private Eterna Guerra Online" / "content"
+    manifests = [
+        content_root / "maps_manifest.json",
+        content_root / "monsters_manifest.json",
+    ]
+    out: list[CheckResult] = []
+    for mf in manifests:
+        if not mf.exists():
+            out.append(CheckResult(f"Manifest exists: {mf.relative_to(REPO_ROOT)}", False, "missing"))
+            continue
+        try:
+            data = json.loads(mf.read_text(encoding="utf-8"))
+            count = int(data.get("file_count", 0))
+            ok = count > 0
+            out.append(CheckResult(f"Manifest valid: {mf.relative_to(REPO_ROOT)}", ok, f"file_count={count}"))
+        except Exception as exc:
+            out.append(CheckResult(f"Manifest valid: {mf.relative_to(REPO_ROOT)}", False, f"error={exc}"))
+    return out
+
 def protocol_notice() -> CheckResult:
     detail = (
         "Legacy client still needs exact proprietary socket packet flow for server-list/realm-list. "
@@ -113,6 +136,7 @@ def main() -> int:
     results.append(check_client_config(env))
     results.extend(check_env_values(env))
     results.extend(check_required_maps(env))
+    results.extend(check_content_manifests())
     results.append(protocol_notice())
 
     failed = 0

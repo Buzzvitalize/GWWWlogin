@@ -1,0 +1,856 @@
+{
+  "source_root": "/workspace/GWWWlogin/Eterna Guerra Online/Localization/en_us/Monster",
+  "file_count": 170,
+  "items": [
+    {
+      "path": "Agate/Address.ini",
+      "size": 2176,
+      "sha1": "fe4b6e42aac7820af8a237024b1e1214a9939f33"
+    },
+    {
+      "path": "Agate/Monster.ini",
+      "size": 8604,
+      "sha1": "b387686f8f8aa05b16df6626c88c704e8acbffe3"
+    },
+    {
+      "path": "Agate2/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Agate2/Monster.ini",
+      "size": 7486,
+      "sha1": "c876dc9fba1c206ed57b2ad41c20abd2f31d0dff"
+    },
+    {
+      "path": "Alcatraz_Island/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Alcatraz_Island/Monster.ini",
+      "size": 46,
+      "sha1": "66d8893d389a2ae7ba845dc2cc8c73aa6093eb09"
+    },
+    {
+      "path": "Arena/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Arena/Monster.ini",
+      "size": 38,
+      "sha1": "6e6090847ad6fb2ae5e356c6e636b921b4fbb538"
+    },
+    {
+      "path": "Argolis_All/Address.ini",
+      "size": 1476,
+      "sha1": "49402ac6fd7ee9ee986e9bd01dcee7d213b5aff4"
+    },
+    {
+      "path": "Argolis_All/Monster.ini",
+      "size": 24016,
+      "sha1": "fbb15654b5529bcc262e8bc8b48ae8d8127d17a6"
+    },
+    {
+      "path": "Athens/Address.ini",
+      "size": 3212,
+      "sha1": "3c7e011985f31ae0136ff1fe0a2c0feefdb799d7"
+    },
+    {
+      "path": "Athens/Monster.ini",
+      "size": 18536,
+      "sha1": "81c8034b07c2ad6d944673048d3ff665b53b2aff"
+    },
+    {
+      "path": "Athens/_svn/all-wcprops",
+      "size": 504,
+      "sha1": "ad304ad76a7fe6316524ee81b980c36f7bbe35f0"
+    },
+    {
+      "path": "Athens/_svn/entries",
+      "size": 588,
+      "sha1": "19f798804f0d791f7932f5279b1cfe2ecd0e434c"
+    },
+    {
+      "path": "Athens/_svn/format",
+      "size": 2,
+      "sha1": "b6abd567fa79cbe0196d093a067271361dc6ca8b"
+    },
+    {
+      "path": "Athens/_svn/text-base/Address.ini.svn-base",
+      "size": 451,
+      "sha1": "ddad00092cd3863ba1bc334ab969fb78b6e67471"
+    },
+    {
+      "path": "Athens/_svn/text-base/Monster.ini.svn-base",
+      "size": 3187,
+      "sha1": "bf2342df302749dddd6b4d4504aaf8f1dba68ecd"
+    },
+    {
+      "path": "Athens_Newbie/Address.ini",
+      "size": 1166,
+      "sha1": "9d73025b9e2da985de0104f8a733c11db39b4285"
+    },
+    {
+      "path": "Athens_Newbie/Monster.ini",
+      "size": 26458,
+      "sha1": "7285a4ac20efd265d1f0c52716c246d7812dc467"
+    },
+    {
+      "path": "Atlantis_Entrance/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Atlantis_Entrance/Monster.ini",
+      "size": 52056,
+      "sha1": "979521d78d84fa8103dc03e55f02863852b96dce"
+    },
+    {
+      "path": "Colosse10/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Colosse10/Monster.ini",
+      "size": 1030,
+      "sha1": "e8446cdd7ee82fddfef97a35ae37df9bb9aecdc6"
+    },
+    {
+      "path": "Colosse11/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Colosse11/Monster.ini",
+      "size": 1030,
+      "sha1": "e8446cdd7ee82fddfef97a35ae37df9bb9aecdc6"
+    },
+    {
+      "path": "Colosse12/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Colosse12/Monster.ini",
+      "size": 1030,
+      "sha1": "e8446cdd7ee82fddfef97a35ae37df9bb9aecdc6"
+    },
+    {
+      "path": "Colosse13/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Colosse13/Monster.ini",
+      "size": 1030,
+      "sha1": "e8446cdd7ee82fddfef97a35ae37df9bb9aecdc6"
+    },
+    {
+      "path": "Colosse14/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Colosse14/Monster.ini",
+      "size": 1030,
+      "sha1": "e8446cdd7ee82fddfef97a35ae37df9bb9aecdc6"
+    },
+    {
+      "path": "Colosse15/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Colosse15/Monster.ini",
+      "size": 1030,
+      "sha1": "e8446cdd7ee82fddfef97a35ae37df9bb9aecdc6"
+    },
+    {
+      "path": "Colosse16/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Colosse16/Monster.ini",
+      "size": 1030,
+      "sha1": "e8446cdd7ee82fddfef97a35ae37df9bb9aecdc6"
+    },
+    {
+      "path": "Colosse17/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Colosse17/Monster.ini",
+      "size": 1030,
+      "sha1": "e8446cdd7ee82fddfef97a35ae37df9bb9aecdc6"
+    },
+    {
+      "path": "Colosse18/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Colosse18/Monster.ini",
+      "size": 1030,
+      "sha1": "e8446cdd7ee82fddfef97a35ae37df9bb9aecdc6"
+    },
+    {
+      "path": "Colosse19/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Colosse19/Monster.ini",
+      "size": 1030,
+      "sha1": "e8446cdd7ee82fddfef97a35ae37df9bb9aecdc6"
+    },
+    {
+      "path": "Colosseu1/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Colosseu1/Monster.ini",
+      "size": 1030,
+      "sha1": "e8446cdd7ee82fddfef97a35ae37df9bb9aecdc6"
+    },
+    {
+      "path": "Colosseu2/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Colosseu2/Monster.ini",
+      "size": 1030,
+      "sha1": "e8446cdd7ee82fddfef97a35ae37df9bb9aecdc6"
+    },
+    {
+      "path": "Colosseu3/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Colosseu3/Monster.ini",
+      "size": 1030,
+      "sha1": "e8446cdd7ee82fddfef97a35ae37df9bb9aecdc6"
+    },
+    {
+      "path": "Colosseu4/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Colosseu4/Monster.ini",
+      "size": 1030,
+      "sha1": "e8446cdd7ee82fddfef97a35ae37df9bb9aecdc6"
+    },
+    {
+      "path": "Colosseu5/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Colosseu5/Monster.ini",
+      "size": 1030,
+      "sha1": "e8446cdd7ee82fddfef97a35ae37df9bb9aecdc6"
+    },
+    {
+      "path": "Colosseu6/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Colosseu6/Monster.ini",
+      "size": 1030,
+      "sha1": "e8446cdd7ee82fddfef97a35ae37df9bb9aecdc6"
+    },
+    {
+      "path": "Colosseu7/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Colosseu7/Monster.ini",
+      "size": 1030,
+      "sha1": "e8446cdd7ee82fddfef97a35ae37df9bb9aecdc6"
+    },
+    {
+      "path": "Colosseu8/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Colosseu8/Monster.ini",
+      "size": 1030,
+      "sha1": "e8446cdd7ee82fddfef97a35ae37df9bb9aecdc6"
+    },
+    {
+      "path": "Colosseu9/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Colosseu9/Monster.ini",
+      "size": 1030,
+      "sha1": "e8446cdd7ee82fddfef97a35ae37df9bb9aecdc6"
+    },
+    {
+      "path": "Colosseum/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Colosseum/Monster.ini",
+      "size": 1030,
+      "sha1": "e8446cdd7ee82fddfef97a35ae37df9bb9aecdc6"
+    },
+    {
+      "path": "Derveni_All/Address.ini",
+      "size": 1386,
+      "sha1": "13fc3d23bc006713507cf74845d7f5ceb5bfa0fc"
+    },
+    {
+      "path": "Derveni_All/Monster.ini",
+      "size": 24226,
+      "sha1": "824ea4de07ca5398bba727116c14e2d93f386fcf"
+    },
+    {
+      "path": "Elasson_All/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Elasson_All/Monster.ini",
+      "size": 13440,
+      "sha1": "9e2402e75a6748c0e322a057048260f880a3b72a"
+    },
+    {
+      "path": "Execratively2/Address.ini",
+      "size": 318,
+      "sha1": "e97578a5c5cb392f5b739c6c8533804a899acdcf"
+    },
+    {
+      "path": "Execratively2/Monster.ini",
+      "size": 12822,
+      "sha1": "6ff383b7945e99d067f3469313c8a97da6aae7d6"
+    },
+    {
+      "path": "Execratively3/Address.ini",
+      "size": 322,
+      "sha1": "eeb5d9c931b740b10527abfab9dc0daa6437dff4"
+    },
+    {
+      "path": "Execratively3/Monster.ini",
+      "size": 13982,
+      "sha1": "9b6ae1c6348ded22af2a87cec7797514fdff454d"
+    },
+    {
+      "path": "Execrativelys/Address.ini",
+      "size": 318,
+      "sha1": "e97578a5c5cb392f5b739c6c8533804a899acdcf"
+    },
+    {
+      "path": "Execrativelys/Monster.ini",
+      "size": 12822,
+      "sha1": "6ff383b7945e99d067f3469313c8a97da6aae7d6"
+    },
+    {
+      "path": "Fane/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Fane/Monster.ini",
+      "size": 36598,
+      "sha1": "d2346f408459cf8efb94f7fea90a1badf8d0d544"
+    },
+    {
+      "path": "Field_Test/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Field_Test/Monster.ini",
+      "size": 32228,
+      "sha1": "b8f2500a50fdcc3543e4f908ecf1b2faaca36b51"
+    },
+    {
+      "path": "Field_Test2/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Field_Test2/Monster.ini",
+      "size": 32256,
+      "sha1": "664f98ffaf1a7fe7745d0a3c35bd845869230f7a"
+    },
+    {
+      "path": "Field_Test3/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Field_Test3/Monster.ini",
+      "size": 32230,
+      "sha1": "d7f9186051586c06591466bf41fc4f89b1f984ba"
+    },
+    {
+      "path": "Field_Test4/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Field_Test4/Monster.ini",
+      "size": 32264,
+      "sha1": "14db78ec0e4c39c8294380af076918f62a141cec"
+    },
+    {
+      "path": "GM/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "GM/Monster.ini",
+      "size": 7378,
+      "sha1": "036ae5fe881bb84ccf5d34821cd46ffd94975878"
+    },
+    {
+      "path": "Guardwa2/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Guardwa2/Monster.ini",
+      "size": 8708,
+      "sha1": "42c53ce9737c966a3403119c4c27f5adc7a2f6dd"
+    },
+    {
+      "path": "Guardwar/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Guardwar/Monster.ini",
+      "size": 9834,
+      "sha1": "74581f691a5e9ff258169dc522810723f067576e"
+    },
+    {
+      "path": "Guardwar2/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Guardwar2/Monster.ini",
+      "size": 9834,
+      "sha1": "74581f691a5e9ff258169dc522810723f067576e"
+    },
+    {
+      "path": "Guardwar3/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Guardwar3/Monster.ini",
+      "size": 3720,
+      "sha1": "f114297d06fadae25612224bfcd2d67b7189b321"
+    },
+    {
+      "path": "Guardwar4/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Guardwar4/Monster.ini",
+      "size": 3720,
+      "sha1": "f114297d06fadae25612224bfcd2d67b7189b321"
+    },
+    {
+      "path": "Guardwar5/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Guardwar5/Monster.ini",
+      "size": 3718,
+      "sha1": "16cc30b3791d309d0c89852b14f000dec7e065ce"
+    },
+    {
+      "path": "Heracles/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Heracles/Monster.ini",
+      "size": 50,
+      "sha1": "6499e69822f14456b3a99e19636332abc47d61e3"
+    },
+    {
+      "path": "Isthmus_of_Corinth_All/Address.ini",
+      "size": 568,
+      "sha1": "7c7bcf90c9eeae1902b610d278853cf7df489a78"
+    },
+    {
+      "path": "Isthmus_of_Corinth_All/Monster.ini",
+      "size": 16300,
+      "sha1": "00b989e369db4e8224563371811db912cbc0e6bd"
+    },
+    {
+      "path": "Labyrint2/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Labyrint2/Monster.ini",
+      "size": 46,
+      "sha1": "66d8893d389a2ae7ba845dc2cc8c73aa6093eb09"
+    },
+    {
+      "path": "Labyrint3/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Labyrint3/Monster.ini",
+      "size": 984,
+      "sha1": "49e4a90b1365c8becac28a99af6406f0851c2a1c"
+    },
+    {
+      "path": "Labyrinth/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Labyrinth/Monster.ini",
+      "size": 46,
+      "sha1": "66d8893d389a2ae7ba845dc2cc8c73aa6093eb09"
+    },
+    {
+      "path": "Larissa_All/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Larissa_All/Monster.ini",
+      "size": 15238,
+      "sha1": "1ed51a5440da6b0d60b2f407056f6311ee262aa8"
+    },
+    {
+      "path": "Lelantine_Farm/Address.ini",
+      "size": 2166,
+      "sha1": "e3ef91d89ce92eb1335965d1abee00dfa31b717d"
+    },
+    {
+      "path": "Lelantine_Farm/Monster.ini",
+      "size": 18410,
+      "sha1": "4b34bd8db3720df9631a9879ef61778df226257a"
+    },
+    {
+      "path": "Love_Island/Address.ini",
+      "size": 118,
+      "sha1": "244f0f8cb42f39df80c98660cab702633a9c1762"
+    },
+    {
+      "path": "Love_Island/Monster.ini",
+      "size": 38,
+      "sha1": "6e6090847ad6fb2ae5e356c6e636b921b4fbb538"
+    },
+    {
+      "path": "Marathon_All/Address.ini",
+      "size": 1288,
+      "sha1": "1d3216b051259e057d057aede0566542afdb931d"
+    },
+    {
+      "path": "Marathon_All/Monster.ini",
+      "size": 34584,
+      "sha1": "5d39acd9d37ab607d89285365b837d02c51a7e78"
+    },
+    {
+      "path": "Medusa_Island/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Medusa_Island/Monster.ini",
+      "size": 37598,
+      "sha1": "522a76f90d229d6ca68ad28f59d1e5caefd4f812"
+    },
+    {
+      "path": "Medusa_Island2/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Medusa_Island2/Monster.ini",
+      "size": 36784,
+      "sha1": "259be4f1a26ba1b145174f5af7e6286858957eb8"
+    },
+    {
+      "path": "Megara_All/Address.ini",
+      "size": 1430,
+      "sha1": "0bb8b9974cc2676f8d629e2f17b47bcee0b9d45d"
+    },
+    {
+      "path": "Megara_All/Monster.ini",
+      "size": 23124,
+      "sha1": "51bc6280ac268a4e525c10a57a6e69ef2d03be7d"
+    },
+    {
+      "path": "Monster.ini",
+      "size": 87068,
+      "sha1": "ca1055557c5ac64c309361af2b3855bd1e079014"
+    },
+    {
+      "path": "Mycenae_All/Address.ini",
+      "size": 736,
+      "sha1": "34fb543f2b9e0b2525ea8133b4b56fe73836d063"
+    },
+    {
+      "path": "Mycenae_All/Monster.ini",
+      "size": 23676,
+      "sha1": "eca840c9f58f0231684435624314cfed07fa0bff"
+    },
+    {
+      "path": "Nemea_1/Address.ini",
+      "size": 1738,
+      "sha1": "869de6b8f967fc7314ae1f384dea435c0132fc5b"
+    },
+    {
+      "path": "Nemea_1/Monster.ini",
+      "size": 33804,
+      "sha1": "4f71ad03f556cfb933c3705558fcf558552e8bff"
+    },
+    {
+      "path": "Nemea_2/Address.ini",
+      "size": 448,
+      "sha1": "dc0895cef820a49f3f6a72ffe02ab9ba598929c9"
+    },
+    {
+      "path": "Nemea_2/Monster.ini",
+      "size": 20440,
+      "sha1": "939f6fe09281f8ac20ee23602de3cb7eeeb36537"
+    },
+    {
+      "path": "Olympia_All/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Olympia_All/Monster.ini",
+      "size": 21960,
+      "sha1": "074507c769c1e719e863ec911e719053db2c634e"
+    },
+    {
+      "path": "Olympus_All/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Olympus_All/Monster.ini",
+      "size": 14426,
+      "sha1": "3fb34041cce93dc84c0810eee6cf775a12820f9d"
+    },
+    {
+      "path": "Oracle_of_Delphi_All/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Oracle_of_Delphi_All/Monster.ini",
+      "size": 17228,
+      "sha1": "46226dfc1feb84ad7a5c7e050980040dba942291"
+    },
+    {
+      "path": "Pans_Labyrinth/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Pans_Labyrinth/Monster.ini",
+      "size": 46,
+      "sha1": "66d8893d389a2ae7ba845dc2cc8c73aa6093eb09"
+    },
+    {
+      "path": "Parnassus/Address.ini",
+      "size": 602,
+      "sha1": "670d0cb3bd711fb30bb0294657a5df843207fe25"
+    },
+    {
+      "path": "Parnassus/Monster.ini",
+      "size": 6022,
+      "sha1": "5d867335f43305c0be899ff10a17328e402066bd"
+    },
+    {
+      "path": "Parnitha_1/Address.ini",
+      "size": 1602,
+      "sha1": "47f804a40caf611f43d22417e7b2c9530fe01a67"
+    },
+    {
+      "path": "Parnitha_1/Monster.ini",
+      "size": 34936,
+      "sha1": "f984ccbed03b9d53505227e1725387f3efe437cc"
+    },
+    {
+      "path": "Parnitha_2/Address.ini",
+      "size": 440,
+      "sha1": "993ab09810bf3ce69ddb6c03b926f4f0a975d210"
+    },
+    {
+      "path": "Parnitha_2/Monster.ini",
+      "size": 20540,
+      "sha1": "a0feee40d7a90868782bf351dffea33e5ad516de"
+    },
+    {
+      "path": "Peloponnese_All/Address.ini",
+      "size": 1332,
+      "sha1": "a39865e4a5803117c3cdfa02c55a44d6549f522b"
+    },
+    {
+      "path": "Peloponnese_All/Monster.ini",
+      "size": 34592,
+      "sha1": "fc350b89fda2d65f31ba60ad49663a22ebf5414d"
+    },
+    {
+      "path": "Plataea_All/Address.ini",
+      "size": 1548,
+      "sha1": "10f369c9576e69a2f9114e69c0a1d636e25420e0"
+    },
+    {
+      "path": "Plataea_All/Monster.ini",
+      "size": 25972,
+      "sha1": "b29eca2452f3cc33d5735c065999ac01ac8e9658"
+    },
+    {
+      "path": "Salame/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Salame/Monster.ini",
+      "size": 11736,
+      "sha1": "8d82fd33f7280a8b349397eb0fb5370fb33f351d"
+    },
+    {
+      "path": "Salame2/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Salame2/Monster.ini",
+      "size": 11084,
+      "sha1": "b6fb7bb3570f81769b7114b34c5484c7c3a26733"
+    },
+    {
+      "path": "Sealbox/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Sealbox/Monster.ini",
+      "size": 17314,
+      "sha1": "1490539c41f2451753ce4da33616eabc96cc7647"
+    },
+    {
+      "path": "Sicily/Address.ini",
+      "size": 790,
+      "sha1": "59a69a8b38ffd633295e248f36a9db13020d4a71"
+    },
+    {
+      "path": "Sicily/Monster.ini",
+      "size": 15430,
+      "sha1": "de565753dbb081a2378b77fda3520e204d112dc9"
+    },
+    {
+      "path": "Sicily2/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Sicily2/Monster.ini",
+      "size": 12776,
+      "sha1": "c5c020021a0f8644df56ceb39647281f15cb87fa"
+    },
+    {
+      "path": "Sparta/Address.ini",
+      "size": 3212,
+      "sha1": "4853b297de29f350af1d5e05cec9ff88b3e60032"
+    },
+    {
+      "path": "Sparta/Monster.ini",
+      "size": 18472,
+      "sha1": "2abeab16fcd53faae3e0df5d751b3913ef476c77"
+    },
+    {
+      "path": "Sparta_Newbie/Address.ini",
+      "size": 1220,
+      "sha1": "c5e968a4e77f5a8ded62c05b33e06db124e48f6f"
+    },
+    {
+      "path": "Sparta_Newbie/Monster.ini",
+      "size": 26342,
+      "sha1": "7d944060ebe0620f437e5740aee753e63c790d69"
+    },
+    {
+      "path": "Thebes_All/Address.ini",
+      "size": 756,
+      "sha1": "465be9d568f34e896fbfb01557a445ea08b026f2"
+    },
+    {
+      "path": "Thebes_All/Monster.ini",
+      "size": 23840,
+      "sha1": "944a3fb81f36db1edecc5e7f36845dfa6acebe22"
+    },
+    {
+      "path": "Thermopylae_003/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "Thermopylae_003/Monster.ini",
+      "size": 25068,
+      "sha1": "a6e53944361968efc503a9d28bad9273a4f6b0bf"
+    },
+    {
+      "path": "Thermopylae_All/Address.ini",
+      "size": 1022,
+      "sha1": "127cb6cfe76a62ddcf8902c451d7e4b08ba1afe5"
+    },
+    {
+      "path": "Thermopylae_All/Monster.ini",
+      "size": 26558,
+      "sha1": "34838a353c6c985d67f3ad9a7ed332b9150b0609"
+    },
+    {
+      "path": "Troy/Address.ini",
+      "size": 344,
+      "sha1": "373e5bee0f6721d9f0cf7292b2e7bdc26d410307"
+    },
+    {
+      "path": "Troy/Monster.ini",
+      "size": 3060,
+      "sha1": "5f07674bc845ab516b7ad122e6bcce3e22e41341"
+    },
+    {
+      "path": "WarField/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "WarField/Monster.ini",
+      "size": 8612,
+      "sha1": "96beb3ee65bf023a2793dba49a6b4fdad31bc092"
+    },
+    {
+      "path": "WarHall/Address.ini",
+      "size": 100,
+      "sha1": "080e4183112a13463b4d6662de8bf95894674fe1"
+    },
+    {
+      "path": "WarHall/Monster.ini",
+      "size": 38,
+      "sha1": "6e6090847ad6fb2ae5e356c6e636b921b4fbb538"
+    }
+  ]
+}

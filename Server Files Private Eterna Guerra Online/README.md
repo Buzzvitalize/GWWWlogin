@@ -27,6 +27,7 @@ Y mantiene opción editable para cambiar a SQL Auth o otro server en el futuro.
 - `tools/build_en_us_login_bundle.py`: regenera el bundle desde `Localization/en_us/Text`.
 - `scripts/start_local_stack.bat`: arranque todo-en-uno para Windows (incluye sync automático de `Eterna Guerra Online/config.ini`).
 - `../tools/sync_client_server_config.py`: sincroniza `WORLD_IP/WORLD_PORT` (`api/.env`) hacia `Eterna Guerra Online/config.ini`.
+- `../tools/sync_client_content_to_server_files.py`: genera manifiestos de `Map` y `Localization/en_us/Monster` dentro de `Server Files.../content`.
 
 ## 1) Preparar SQL Server 2025
 
@@ -98,8 +99,9 @@ scripts\start_local_stack.bat
 Esto abre:
 
 1. Sync de `Eterna Guerra Online/config.ini` con `WORLD_IP/WORLD_PORT`
-2. Game Emulator (`127.0.0.1:5999`)
-3. Login/API (`127.0.0.1:8080`)
+2. Sync de manifiestos de contenido (Map/Monster) en `Server Files.../content`
+3. Game Emulator (`127.0.0.1:5999`)
+4. Login/API (`127.0.0.1:8080`)
 
 
 ### Solución si antes fallaba el World Emulator
@@ -207,6 +209,7 @@ El script valida:
 - que exista `EMULATOR_PACKET_SCRIPT_FILE`
 - que `EMULATOR_PORTS` incluya `GAME_SERVER_PORT`
 - que existan los mapas críticos (`REQUIRED_MAP_CODES`)
+- que existan manifiestos de contenido (maps/monsters) en `Server Files.../content`
 
 Si falla **solo** en `Protocol completeness`, significa que la parte de archivos/config está bien y lo pendiente es replicar respuestas binarias del protocolo legacy para lista de servidor/región.
 
@@ -226,6 +229,8 @@ Si quieres validar más mapas, agrega los códigos en `REQUIRED_MAP_CODES` separ
 - `GET http://127.0.0.1:8080/emulator/status`
 - `GET http://127.0.0.1:8080/directory/regions`
 - `GET http://127.0.0.1:8080/content/maps/required`
+- `GET http://127.0.0.1:8080/content/manifests/maps`
+- `GET http://127.0.0.1:8080/content/manifests/monsters`
 
 Para pruebas correctas, debe aparecer `"message": "Sistema Online"`.
 

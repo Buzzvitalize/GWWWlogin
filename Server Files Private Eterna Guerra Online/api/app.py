@@ -26,6 +26,7 @@ WORLD_PORT = int(os.getenv("WORLD_PORT", "5999"))
 GAME_SERVER_IP = os.getenv("GAME_SERVER_IP", WORLD_IP)
 GAME_SERVER_PORT = int(os.getenv("GAME_SERVER_PORT", "7000"))
 MAP_ROOT = Path(__file__).resolve().parents[2] / "Eterna Guerra Online" / "Map"
+CONTENT_DIR = Path(__file__).resolve().parents[1] / "content"
 REQUIRED_MAP_CODES = [m.strip() for m in os.getenv("REQUIRED_MAP_CODES", "TerrAthens_Newbie,TerrAthens,Sparta_Newbie,Sparta").split(",") if m.strip()]
 
 app = FastAPI(title="Eterna Guerra Login/Game API", version="2.2.0")
@@ -157,6 +158,13 @@ def map_status(map_code: str) -> MapAssetStatus:
     return MapAssetStatus(map_code=map_code, exists=path is not None, resolved_path=str(path) if path else None)
 
 
+def load_content_manifest(name: str) -> dict[str, Any]:
+    path = CONTENT_DIR / f"{name}_manifest.json"
+    if not path.exists():
+        raise HTTPException(status_code=404, detail=f"CONTENT_MANIFEST_MISSING:{name}")
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 def build_connection_string() -> str:
     if DB_CONNECTION_STRING:
         return DB_CONNECTION_STRING
@@ -259,6 +267,16 @@ def required_maps_status() -> list[MapAssetStatus]:
 @app.get("/content/maps/{map_code}", response_model=MapAssetStatus)
 def single_map_status(map_code: str) -> MapAssetStatus:
     return map_status(map_code)
+
+
+@app.get("/content/manifests/maps")
+def maps_manifest() -> dict[str, Any]:
+    return load_content_manifest("maps")
+
+
+@app.get("/content/manifests/monsters")
+def monsters_manifest() -> dict[str, Any]:
+    return load_content_manifest("monsters")
 
 
 @app.post("/auth/register")
