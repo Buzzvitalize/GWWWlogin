@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="GB2312"?>
+<!--this is ItemColor config-->
+<ItemColor>
+    <Equip>
+        <Base>
+            <BaseLevel1 BaseLv="1" BaseName="普通的" BaseColor="DEFAULT_TEXTCOLOR"/>
+            <BaseLevel2 BaseLv="2" BaseName="坚固的" BaseColor="TEAM_COLOR"/>
+            <BaseLevel3 BaseLv="3" BaseName="精致的" BaseColor="YELLOW_TEXTCOLOR"/>
+            <BaseLevel4 BaseLv="4" BaseName="卓越的" BaseColor="GREEN_TEXTCOLOR"/>
+            <BaseLevel5 BaseLv="5" BaseName="完美的" BaseColor="Itemper_color"/>
+        </Base>
+        <Append>
+            <AppLevel1 AppendLv="1" AppendStar="☆" AppendColor="DEFAULT_TEXTCOLOR" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel2 AppendLv="2" AppendStar="☆☆" AppendColor="DEFAULT_TEXTCOLOR" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel3 AppendLv="3" AppendStar="★★★" AppendColor="DEFAULT_TEXTCOLOR" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel4 AppendLv="4" AppendStar="★★★★" AppendColor="TEAM_COLOR" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel5 AppendLv="5" AppendStar="★★★★★" AppendColor="TEAM_COLOR" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel6 AppendLv="6" AppendStar="★★★★★★" AppendColor="YELLOW_TEXTCOLOR" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel7 AppendLv="7" AppendStar="●●●●●●●" AppendColor="YELLOW_TEXTCOLOR" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel8 AppendLv="8" AppendStar="●●●●●●●●" AppendColor="GREEN_TEXTCOLOR" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel9 AppendLv="9" AppendStar="囧囧囧囧囧囧囧囧囧" AppendColor="GREEN_TEXTCOLOR" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel10 AppendLv="10" AppendStar="囧囧囧囧囧囧囧囧囧囧" AppendColor="Itemper_color" AppAttributeColor="GREEN_TEXTCOLOR"/>
+        </Append>
+    </Equip>
+</ItemColor>
