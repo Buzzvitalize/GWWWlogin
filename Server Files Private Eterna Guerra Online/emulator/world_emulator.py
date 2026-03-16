@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import json
 import os
 import socket
 import socketserver
 import threading
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -31,7 +33,7 @@ GAME_SERVER_PORT = int(os.getenv("GAME_SERVER_PORT", "7000"))
 EMULATOR_PORTS = os.getenv("EMULATOR_PORTS", f"{WORLD_PORT},{GAME_SERVER_PORT},6000,29000")
 
 EMULATOR_MODE = os.getenv("EMULATOR_MODE", "hybrid")  # hybrid | echo | text
-BINARY_REPLY_MODE = os.getenv("EMULATOR_BINARY_REPLY_MODE", "ack")  # ack | echo
+BINARY_REPLY_MODE = os.getenv("EMULATOR_BINARY_REPLY_MODE", "scripted")  # scripted | mirror_first | ack | echo
 BINARY_REPLY_HEX = os.getenv("EMULATOR_BINARY_REPLY_HEX", "47 57 68 7C")
 
 ENABLE_UDP = os.getenv("EMULATOR_ENABLE_UDP", "1") == "1"
@@ -40,25 +42,49 @@ UDP_REPLY_HEX = os.getenv("EMULATOR_UDP_REPLY_HEX", "47 57 68 7C")
 LOG_PACKETS = os.getenv("EMULATOR_LOG_PACKETS", "1") == "1"
 log_raw = os.getenv("EMULATOR_LOG_FILE", "logs/world_emulator_packets.log")
 
+PACKET_SCRIPT_FILE = os.getenv("EMULATOR_PACKET_SCRIPT_FILE", "emulator/packet_script.json")
+
 
 def resolve_log_path(raw: str) -> Path:
     p = Path(raw)
     if p.is_absolute():
         return p
 
-    # Si viene con prefijo redundante "Server Files Private Eterna Guerra Online/..."
-    # lo recortamos para evitar duplicar ROOT_DIR en el join final.
     if p.parts and p.parts[0] == ROOT_DIR.name:
         p = Path(*p.parts[1:])
 
     return ROOT_DIR / p
 
 
+def resolve_relative(raw: str) -> Path:
+    p = Path(raw)
+    if p.is_absolute():
+        return p
+    if p.parts and p.parts[0] == ROOT_DIR.name:
+        p = Path(*p.parts[1:])
+    return ROOT_DIR / p
+
+
 LOG_FILE = resolve_log_path(log_raw)
+SCRIPT_FILE = resolve_relative(PACKET_SCRIPT_FILE)
 
 SEND_HELLO_ON_CONNECT = os.getenv("EMULATOR_SEND_HELLO_ON_CONNECT", "1") == "1"
 HELLO_TEXT = os.getenv("EMULATOR_HELLO_TEXT", "SYSTEM_ONLINE\\n")
 HELLO_SEQUENCE_HEX = os.getenv("EMULATOR_HELLO_SEQUENCE_HEX", "47 57 68 7C")  # 'GWh|'
+
+
+@dataclass
+class PacketRule:
+    name: str
+    starts_with: bytes
+    length: int | None
+    reply: bytes
+
+
+@dataclass
+class PacketScript:
+    rules: list[PacketRule]
+    fallback: bytes
 
 
 def parse_ports(raw: str) -> list[int]:
@@ -107,6 +133,56 @@ def pick_payload(raw: str) -> bytes:
     return payloads[0] if payloads else b""
 
 
+def load_packet_script() -> PacketScript:
+    fallback = pick_payload(BINARY_REPLY_HEX)
+    if not SCRIPT_FILE.exists():
+        append_log(f"[{now_utc()}] SCRIPT_MISS file={SCRIPT_FILE}")
+        return PacketScript(rules=[], fallback=fallback)
+
+    try:
+        data = json.loads(SCRIPT_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        append_log(f"[{now_utc()}] SCRIPT_LOAD_FAIL file={SCRIPT_FILE} err={exc}")
+        return PacketScript(rules=[], fallback=fallback)
+
+    rules: list[PacketRule] = []
+    for idx, item in enumerate(data.get("rules", []), start=1):
+        try:
+            starts_with = bytes.fromhex(str(item.get("starts_with", "")).replace(" ", ""))
+            reply = bytes.fromhex(str(item.get("reply", "")).replace(" ", ""))
+            length = item.get("length")
+            length_val = int(length) if length is not None else None
+            name = str(item.get("name", f"rule_{idx}"))
+            rules.append(PacketRule(name=name, starts_with=starts_with, length=length_val, reply=reply))
+        except ValueError:
+            append_log(f"[{now_utc()}] SCRIPT_RULE_INVALID index={idx}")
+
+    fallback_hex = data.get("fallback_reply_hex")
+    if isinstance(fallback_hex, str) and fallback_hex.strip():
+        parsed_fallback = pick_payload(fallback_hex)
+        if parsed_fallback:
+            fallback = parsed_fallback
+
+    append_log(f"[{now_utc()}] SCRIPT_OK file={SCRIPT_FILE} rules={len(rules)}")
+    return PacketScript(rules=rules, fallback=fallback)
+
+
+PACKET_SCRIPT = load_packet_script()
+
+
+def scripted_reply(data: bytes) -> bytes:
+    for rule in PACKET_SCRIPT.rules:
+        if rule.length is not None and len(data) != rule.length:
+            continue
+        if rule.starts_with and not data.startswith(rule.starts_with):
+            continue
+        append_log(
+            f"[{now_utc()}] SCRIPT_MATCH name={rule.name} len={len(data)} prefix={rule.starts_with.hex(' ')} reply_len={len(rule.reply)}"
+        )
+        return rule.reply
+    return PACKET_SCRIPT.fallback
+
+
 def send_initial_hello(sock: socket.socket, client: str, listen_port: int) -> None:
     if not SEND_HELLO_ON_CONNECT:
         return
@@ -131,6 +207,7 @@ class WorldHandler(socketserver.BaseRequestHandler):
         print(f"[{now_utc()}] Cliente conectado: {client} -> local:{listen_port}")
 
         self.request.settimeout(10.0)
+        binary_packets = 0
         try:
             send_initial_hello(self.request, client, listen_port)
         except OSError:
@@ -156,9 +233,25 @@ class WorldHandler(socketserver.BaseRequestHandler):
                         if all((31 < ord(ch) < 127) or ch in "\r\n\t" for ch in text):
                             reply = HELLO_TEXT.encode("utf-8", errors="ignore")
                         else:
-                            reply = data if BINARY_REPLY_MODE == "echo" else pick_payload(BINARY_REPLY_HEX)
+                            if BINARY_REPLY_MODE == "echo":
+                                reply = data
+                            elif BINARY_REPLY_MODE == "mirror_first" and binary_packets == 0:
+                                reply = data
+                            elif BINARY_REPLY_MODE == "scripted":
+                                reply = scripted_reply(data)
+                            else:
+                                reply = pick_payload(BINARY_REPLY_HEX)
+                            binary_packets += 1
                     except UnicodeDecodeError:
-                        reply = data if BINARY_REPLY_MODE == "echo" else pick_payload(BINARY_REPLY_HEX)
+                        if BINARY_REPLY_MODE == "echo":
+                            reply = data
+                        elif BINARY_REPLY_MODE == "mirror_first" and binary_packets == 0:
+                            reply = data
+                        elif BINARY_REPLY_MODE == "scripted":
+                            reply = scripted_reply(data)
+                        else:
+                            reply = pick_payload(BINARY_REPLY_HEX)
+                        binary_packets += 1
 
                 if reply:
                     self.request.sendall(reply)
@@ -207,7 +300,7 @@ def main() -> None:
     ports = parse_ports(EMULATOR_PORTS)
     print(
         f"Estado: Sistema Online | host={WORLD_HOST} | ports={ports} | mode={EMULATOR_MODE} | "
-        f"udp={ENABLE_UDP} | hello={SEND_HELLO_ON_CONNECT} | binary_reply={BINARY_REPLY_MODE} | log={LOG_FILE}"
+        f"udp={ENABLE_UDP} | hello={SEND_HELLO_ON_CONNECT} | binary_reply={BINARY_REPLY_MODE} | script={SCRIPT_FILE} | log={LOG_FILE}"
     )
 
     threads: list[threading.Thread] = []

@@ -25,6 +25,9 @@ WORLD_IP = os.getenv("WORLD_IP", "127.0.0.1")
 WORLD_PORT = int(os.getenv("WORLD_PORT", "5999"))
 GAME_SERVER_IP = os.getenv("GAME_SERVER_IP", WORLD_IP)
 GAME_SERVER_PORT = int(os.getenv("GAME_SERVER_PORT", "7000"))
+MAP_ROOT = Path(__file__).resolve().parents[2] / "Eterna Guerra Online" / "Map"
+CONTENT_DIR = Path(__file__).resolve().parents[1] / "content"
+REQUIRED_MAP_CODES = [m.strip() for m in os.getenv("REQUIRED_MAP_CODES", "TerrAthens_Newbie,TerrAthens,Sparta_Newbie,Sparta").split(",") if m.strip()]
 
 app = FastAPI(title="Eterna Guerra Login/Game API", version="2.2.0")
 
@@ -133,6 +136,35 @@ class RegionServerEntry(BaseModel):
     game_port: int
 
 
+class MapAssetStatus(BaseModel):
+    map_code: str
+    exists: bool
+    resolved_path: str | None = None
+
+
+def resolve_map_asset(map_code: str) -> Path | None:
+    candidates = [
+        MAP_ROOT / f"{map_code}.hmp",
+        MAP_ROOT / map_code / f"{map_code}.ini",
+    ]
+    for c in candidates:
+        if c.exists():
+            return c
+    return None
+
+
+def map_status(map_code: str) -> MapAssetStatus:
+    path = resolve_map_asset(map_code)
+    return MapAssetStatus(map_code=map_code, exists=path is not None, resolved_path=str(path) if path else None)
+
+
+def load_content_manifest(name: str) -> dict[str, Any]:
+    path = CONTENT_DIR / f"{name}_manifest.json"
+    if not path.exists():
+        raise HTTPException(status_code=404, detail=f"CONTENT_MANIFEST_MISSING:{name}")
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 def build_connection_string() -> str:
     if DB_CONNECTION_STRING:
         return DB_CONNECTION_STRING
@@ -225,6 +257,26 @@ def emulator_status() -> dict[str, str | int | bool]:
 @app.get("/directory/regions", response_model=list[RegionServerEntry])
 def list_region_servers() -> list[RegionServerEntry]:
     return [RegionServerEntry(**item) for item in load_region_server_directory()]
+
+
+@app.get("/content/maps/required", response_model=list[MapAssetStatus])
+def required_maps_status() -> list[MapAssetStatus]:
+    return [map_status(code) for code in REQUIRED_MAP_CODES]
+
+
+@app.get("/content/maps/{map_code}", response_model=MapAssetStatus)
+def single_map_status(map_code: str) -> MapAssetStatus:
+    return map_status(map_code)
+
+
+@app.get("/content/manifests/maps")
+def maps_manifest() -> dict[str, Any]:
+    return load_content_manifest("maps")
+
+
+@app.get("/content/manifests/monsters")
+def monsters_manifest() -> dict[str, Any]:
+    return load_content_manifest("monsters")
 
 
 @app.post("/auth/register")
@@ -391,6 +443,10 @@ def enter_world(authorization: str | None = Header(default=None)) -> EnterWorldR
 
     if not is_world_online(WORLD_IP, WORLD_PORT):
         raise HTTPException(status_code=503, detail="WORLD_EMULATOR_OFFLINE")
+
+    current_map_code = str(row[2])
+    if resolve_map_asset(current_map_code) is None:
+        raise HTTPException(status_code=503, detail=f"MAP_ASSET_MISSING:{current_map_code}")
 
     return EnterWorldResponse(
         world_ip=WORLD_IP,

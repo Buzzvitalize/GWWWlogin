@@ -27,6 +27,7 @@ Y mantiene opción editable para cambiar a SQL Auth o otro server en el futuro.
 - `tools/build_en_us_login_bundle.py`: regenera el bundle desde `Localization/en_us/Text`.
 - `scripts/start_local_stack.bat`: arranque todo-en-uno para Windows (incluye sync automático de `Eterna Guerra Online/config.ini`).
 - `../tools/sync_client_server_config.py`: sincroniza `WORLD_IP/WORLD_PORT` (`api/.env`) hacia `Eterna Guerra Online/config.ini`.
+- `../tools/sync_client_content_to_server_files.py`: genera manifiestos de `Map` y `Localization/en_us/Monster` dentro de `Server Files.../content`.
 
 ## 1) Preparar SQL Server 2025
 
@@ -76,6 +77,18 @@ ajusta en `api/.env`:
 
 > En este repo la BD actual sigue siendo SQL Server (no MySQL) y no se usa Redis en el flujo base.
 
+## Orden del flujo en este cliente (confirmado en archivos del cliente)
+
+En `Localization/en_us/UI/XML/LoginUI.xml` la pantalla principal después de autenticar es `SelectServerWin` (ID `190017`) con lista `SvrContent` (ID `190019`) y botón `MoreServerBtn` (ID `190033`).
+
+Esto indica que el orden práctico es:
+
+1. Login
+2. Selección de servidor recomendado
+3. (Opcional) `More Servers` para abrir selector extendido (normalmente por región/realm)
+
+No aparece una pantalla de región independiente *antes* del primer listado; la región parece estar dentro del flujo de "More Servers" y datos que llegan por protocolo socket del login.
+
 ## 3) Encendido rápido (Windows)
 
 ```bat
@@ -86,8 +99,9 @@ scripts\start_local_stack.bat
 Esto abre:
 
 1. Sync de `Eterna Guerra Online/config.ini` con `WORLD_IP/WORLD_PORT`
-2. Game Emulator (`127.0.0.1:5999`)
-3. Login/API (`127.0.0.1:8080`)
+2. Sync de manifiestos de contenido (Map/Monster) en `Server Files.../content`
+3. Game Emulator (`127.0.0.1:5999`)
+4. Login/API (`127.0.0.1:8080`)
 
 
 ### Solución si antes fallaba el World Emulator
@@ -163,13 +177,50 @@ En ese caso prueba temporalmente:
 
 y vuelve a capturar `logs/world_emulator_packets.log` para aproximar la respuesta real esperada por el cliente.
 
+Para acelerar calibración de handshake:
+
+```bash
+python tools/build_packet_script_from_log.py
+```
+
+Ese comando toma el primer `RECV` binario del log y genera/actualiza `emulator/packet_script.json` con una regla inicial.
+
 Por eso ahora el default recomendado en `.env` es:
 
 - `EMULATOR_MODE=hybrid`
-- `EMULATOR_BINARY_REPLY_MODE=ack`
+- `EMULATOR_BINARY_REPLY_MODE=scripted`
 - `EMULATOR_BINARY_REPLY_HEX=47 57 68 7C`
 
-(antes estaba respondiendo eco para binario y eso normalmente falla en cliente legacy).
+`scripted` permite responder por reglas (prefijo+longitud) definidas en `emulator/packet_script.json`, ideal para emular handshake/login propietario por pasos.
+
+## 3.6) Checklist rápido de readiness de login
+
+Ejecuta:
+
+```bash
+python tools/check_login_readiness.py
+```
+
+El script valida:
+
+- existencia de `GodsWar.exe`, `Net.dll`, `LoginUI.xml`
+- sincronía entre `Eterna Guerra Online/config.ini` y `WORLD_IP/WORLD_PORT`
+- que `EMULATOR_BINARY_REPLY_MODE` esté en `scripted` o `mirror_first`
+- que exista `EMULATOR_PACKET_SCRIPT_FILE`
+- que `EMULATOR_PORTS` incluya `GAME_SERVER_PORT`
+- que existan los mapas críticos (`REQUIRED_MAP_CODES`)
+- que existan manifiestos de contenido (maps/monsters) en `Server Files.../content`
+
+Si falla **solo** en `Protocol completeness`, significa que la parte de archivos/config está bien y lo pendiente es replicar respuestas binarias del protocolo legacy para lista de servidor/región.
+
+### Verificación de mapas (Athens/Sparta y demás)
+
+Para evitar que falle la entrada al mundo por contenido faltante:
+
+- Configura `REQUIRED_MAP_CODES` en `api/.env` (por default: `TerrAthens_Newbie,TerrAthens,Sparta_Newbie,Sparta`).
+- Consulta `GET /content/maps/required` para ver disponibilidad real de cada mapa.
+
+Si quieres validar más mapas, agrega los códigos en `REQUIRED_MAP_CODES` separados por coma.
 
 ## 4) Validación de estado online
 
@@ -177,6 +228,9 @@ Por eso ahora el default recomendado en `.env` es:
 - `GET http://127.0.0.1:8080/db/config`
 - `GET http://127.0.0.1:8080/emulator/status`
 - `GET http://127.0.0.1:8080/directory/regions`
+- `GET http://127.0.0.1:8080/content/maps/required`
+- `GET http://127.0.0.1:8080/content/manifests/maps`
+- `GET http://127.0.0.1:8080/content/manifests/monsters`
 
 Para pruebas correctas, debe aparecer `"message": "Sistema Online"`.
 
@@ -203,6 +257,7 @@ Para pruebas correctas, debe aparecer `"message": "Sistema Online"`.
 `POST /session/enter-world`
 
 > Si el Game Emulator está apagado, devuelve `WORLD_EMULATOR_OFFLINE`.
+> Si falta el mapa del personaje en cliente (`Map/*.hmp` o `Map/<map>/ <map>.ini`), devuelve `MAP_ASSET_MISSING:<MapCode>`.
 
 ## Notas
 
