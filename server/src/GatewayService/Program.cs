@@ -2,6 +2,7 @@ using GWWWlogin.GatewayService.Data;
 using GWWWlogin.GatewayService.HostedServices;
 using GWWWlogin.GatewayService.Models;
 using GWWWlogin.GatewayService.Services;
+using GWWWlogin.GatewayService.World;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<GatewayOptions>(builder.Configuration.GetSection(GatewayOptions.SectionName));
 builder.Services.AddDbContext<GatewayDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("AuthDb")));
+builder.Services.AddSingleton<IMapStateService, MapStateService>();
 builder.Services.AddScoped<IGatewaySessionService, GatewaySessionService>();
 builder.Services.AddHostedService<TcpGatewayHostedService>();
 
@@ -27,6 +29,7 @@ app.MapGet("/health", async (IConfiguration configuration, GatewayDbContext dbCo
         tcpPort = options.Port,
         publicHost = options.PublicHost,
         sessions = sessionCount,
+        supportedCommands = new[] { "HELLO", "ENTER_MAP", "PING", "WHOAMI", "MOVE" },
         utc = DateTime.UtcNow
     });
 });

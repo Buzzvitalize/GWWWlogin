@@ -18,6 +18,7 @@ Responsable de:
 - aceptar conexiones TCP iniciales;
 - ejecutar handshake inicial por sesión;
 - validar entrada al mapa usando la sesión persistida;
+- mantener estado mínimo del mapa en memoria;
 - preparar futura lógica del mundo.
 
 ## Carpetas

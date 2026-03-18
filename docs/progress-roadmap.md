@@ -56,10 +56,14 @@ Cuando cambiemos de nivel lo vamos a dejar anotado aquí con esta frase:
 - listener TCP inicial;
 - ticket de gateway desde `LoginService`;
 - comando `HELLO <token>` en el gateway;
-- comando `ENTER_MAP <token>` en el gateway.
+- comando `ENTER_MAP <token>` en el gateway;
+- comando `PING <token>`;
+- comando `WHOAMI <token>`;
+- comando `MOVE <token> <x> <y>`;
+- estado de mapa en memoria.
 
 ### Qué sigue después
 - ampliar handshake del cliente;
-- agregar comandos base del juego;
-- crear estado real del mapa;
+- crear estado real del mapa con entidades;
+- agregar broadcast entre jugadores;
 - maps reales.

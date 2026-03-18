@@ -43,6 +43,7 @@ Usaremos **C# con .NET 8** como objetivo del proyecto porque ofrece:
 - handshake;
 - entrada al mapa;
 - comandos base;
+- estado de mapa en memoria;
 - ticket de entrada al mapa;
 - catálogo de paquetes.
 
@@ -70,5 +71,5 @@ Cuando terminemos este nivel, seguimos con una de estas tareas:
 
 1. ampliar handshake inicial del gateway;
 2. agregar migrations formales de EF Core;
-3. agregar comandos base del juego;
-4. empezar estado real del mapa.
+3. crear estado real del mapa con entidades;
+4. agregar broadcast y sincronización base.

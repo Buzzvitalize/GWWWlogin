@@ -49,17 +49,25 @@ public sealed class TcpGatewayHostedService(
 
             await writer.WriteLineAsync("GWWW_GATEWAY_READY");
 
-            var line = await reader.ReadLineAsync(cancellationToken);
-            if (string.IsNullOrWhiteSpace(line))
+            while (!cancellationToken.IsCancellationRequested)
             {
-                await writer.WriteLineAsync("ERROR empty_command");
-                return;
-            }
+                var line = await reader.ReadLineAsync(cancellationToken);
+                if (line is null)
+                {
+                    return;
+                }
 
-            using var scope = scopeFactory.CreateScope();
-            var sessionService = scope.ServiceProvider.GetRequiredService<IGatewaySessionService>();
-            var result = await sessionService.HandleCommandAsync(line, cancellationToken);
-            await writer.WriteLineAsync(result.ResponseLine);
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    await writer.WriteLineAsync("ERROR empty_command");
+                    continue;
+                }
+
+                using var scope = scopeFactory.CreateScope();
+                var sessionService = scope.ServiceProvider.GetRequiredService<IGatewaySessionService>();
+                var result = await sessionService.HandleCommandAsync(line, cancellationToken);
+                await writer.WriteLineAsync(result.ResponseLine);
+            }
         }
     }
 }
