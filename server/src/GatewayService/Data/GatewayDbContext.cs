@@ -27,6 +27,8 @@ public sealed class GatewayDbContext(DbContextOptions<GatewayDbContext> options)
         character.Property(x => x.NormalizedName).HasMaxLength(24).IsRequired();
         character.Property(x => x.Class).HasMaxLength(24).IsRequired();
         character.Property(x => x.Gender).HasMaxLength(16).IsRequired();
+        character.Property(x => x.Faction).HasMaxLength(16).IsRequired();
+        character.Property(x => x.SceneName).HasMaxLength(64).IsRequired();
         character.Property(x => x.Level).IsRequired();
         character.Property(x => x.MapId).IsRequired();
         character.Property(x => x.PositionX).IsRequired();

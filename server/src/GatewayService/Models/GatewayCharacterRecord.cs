@@ -14,6 +14,10 @@ public sealed class GatewayCharacterRecord
 
     public string Gender { get; set; } = string.Empty;
 
+    public string Faction { get; set; } = string.Empty;
+
+    public string SceneName { get; set; } = string.Empty;
+
     public int Level { get; set; }
 
     public int MapId { get; set; }

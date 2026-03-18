@@ -1,11 +1,12 @@
 using GWWWlogin.GatewayService.Data;
+using GWWWlogin.GatewayService.Definitions;
 using GWWWlogin.GatewayService.Protocols;
 using GWWWlogin.GatewayService.World;
 using Microsoft.EntityFrameworkCore;
 
 namespace GWWWlogin.GatewayService.Services;
 
-public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateService mapStateService) : IGatewaySessionService
+public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateService mapStateService, IMapDefinitionService mapDefinitionService) : IGatewaySessionService
 {
     public async Task<GatewayCommandResult> HandleCommandAsync(string commandLine, CancellationToken cancellationToken)
     {
@@ -55,7 +56,7 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
 
         return new GatewayCommandResult(
             true,
-            $"HANDSHAKE_OK {session.AccountId} {session.SelectedCharacter.Id} {session.SelectedCharacter.MapId}");
+            $"HANDSHAKE_OK {session.AccountId} {session.SelectedCharacter.Id} {session.SelectedCharacter.SceneName} {session.SelectedCharacter.MapId}");
     }
 
     private async Task<GatewayCommandResult> HandleEnterMapAsync(string token, CancellationToken cancellationToken)
@@ -88,6 +89,8 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
             session.AccountId,
             character.Id,
             character.Name,
+            character.Faction,
+            character.SceneName,
             character.MapId,
             character.PositionX,
             character.PositionY,
@@ -95,9 +98,13 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
 
         var population = mapStateService.GetPopulation(state.MapId);
 
+        var mapDefinition = mapDefinitionService.GetById(state.MapId);
+        var npcCount = mapDefinition?.Npcs.Count ?? 0;
+        var monsterCount = mapDefinition?.Monsters.Count ?? 0;
+
         return new GatewayCommandResult(
             true,
-            $"ENTER_MAP_OK {state.MapId} {state.PositionX} {state.PositionY} {state.Level} {population}");
+            $"ENTER_MAP_OK {state.SceneName} {state.MapId} {state.PositionX} {state.PositionY} {state.Level} {population} {npcCount} {monsterCount}");
     }
 
     private async Task<GatewayCommandResult> HandlePingAsync(string token, CancellationToken cancellationToken)
@@ -147,13 +154,13 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
         {
             return new GatewayCommandResult(
                 true,
-                $"PLAYER_INFO {mapState.CharacterName} {mapState.MapId} {mapState.PositionX} {mapState.PositionY} {mapState.Level}");
+                $"PLAYER_INFO {mapState.CharacterName} {mapState.Faction} {mapState.SceneName} {mapState.MapId} {mapState.PositionX} {mapState.PositionY} {mapState.Level}");
         }
 
         var character = session.SelectedCharacter;
         return new GatewayCommandResult(
             true,
-            $"PLAYER_INFO {character.Name} {character.MapId} {character.PositionX} {character.PositionY} {character.Level}");
+            $"PLAYER_INFO {character.Name} {character.Faction} {character.SceneName} {character.MapId} {character.PositionX} {character.PositionY} {character.Level}");
     }
 
     private async Task<GatewayCommandResult> HandleMoveAsync(string token, float positionX, float positionY, CancellationToken cancellationToken)

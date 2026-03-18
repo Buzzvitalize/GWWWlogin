@@ -68,3 +68,9 @@ Con eso podremos mapear:
 - monstruos base;
 - punto de entrada;
 - comandos iniciales del mapa.
+
+
+## Regla de inicio sugerida
+
+- personaje de facción `Athens` -> `Athens_Newbie`
+- personaje de facción `Sparta` -> `Sparta_Newbie`

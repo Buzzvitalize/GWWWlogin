@@ -34,7 +34,8 @@ Construir un backend propio, mantenible y documentado, sin copiar archivos propi
 10. levantar `GatewayService`;
 11. probar `HELLO <token>` en el gateway TCP;
 12. probar `ENTER_MAP <token>` en el gateway TCP;
-13. usar `PING <token>`, `WHOAMI <token>` y `MOVE <token> <x> <y>` como comandos base.
+13. usar `PING <token>`, `WHOAMI <token>` y `MOVE <token> <x> <y>` como comandos base;
+14. iniciar Athens en `Athens_Newbie` y Sparta en `Sparta_Newbie`.
 
 ## Seguimiento del progreso
 

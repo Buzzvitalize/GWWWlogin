@@ -9,6 +9,8 @@ public interface IMapStateService
         Guid accountId,
         Guid characterId,
         string characterName,
+        string faction,
+        string sceneName,
         int mapId,
         float positionX,
         float positionY,

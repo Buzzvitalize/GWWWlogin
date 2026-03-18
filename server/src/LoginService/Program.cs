@@ -112,11 +112,12 @@ app.MapPost("/api/characters", async (
 {
     if (!request.Name.HasValidCharacterPayload(3, 24) ||
         !request.Class.HasValidCharacterPayload(3, 24) ||
-        !request.Gender.HasValidCharacterPayload(3, 16))
+        !request.Gender.HasValidCharacterPayload(3, 16) ||
+        !request.Faction.HasValidCharacterPayload(3, 16))
     {
         return Results.BadRequest(new
         {
-            message = "Character name, class and gender are required with valid lengths."
+            message = "Character name, class, gender and faction are required with valid lengths."
         });
     }
 
@@ -124,7 +125,7 @@ app.MapPost("/api/characters", async (
     {
         return Results.BadRequest(new
         {
-            message = "Class must be Warrior, Mage or Champion."
+            message = "Class must be Warrior, Champion, Priest or Mage."
         });
     }
 
@@ -133,6 +134,14 @@ app.MapPost("/api/characters", async (
         return Results.BadRequest(new
         {
             message = "Gender must be Male or Female."
+        });
+    }
+
+    if (!request.Faction.IsAllowedFaction())
+    {
+        return Results.BadRequest(new
+        {
+            message = "Faction must be Athens or Sparta."
         });
     }
 

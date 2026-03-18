@@ -71,6 +71,14 @@ public sealed class AuthDbContext(DbContextOptions<AuthDbContext> options) : DbC
             .HasMaxLength(16)
             .IsRequired();
 
+        character.Property(x => x.Faction)
+            .HasMaxLength(16)
+            .IsRequired();
+
+        character.Property(x => x.SceneName)
+            .HasMaxLength(64)
+            .IsRequired();
+
         character.Property(x => x.Level)
             .IsRequired();
 

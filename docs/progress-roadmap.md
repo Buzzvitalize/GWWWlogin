@@ -60,7 +60,9 @@ Cuando cambiemos de nivel lo vamos a dejar anotado aquí con esta frase:
 - comando `PING <token>`;
 - comando `WHOAMI <token>`;
 - comando `MOVE <token> <x> <y>`;
-- estado de mapa en memoria.
+- estado de mapa en memoria;
+- inicio por facción hacia `Athens_Newbie` y `Sparta_Newbie`;
+- definiciones iniciales de mapa/NPC/monstruo.
 
 ### Qué sigue después
 - ampliar handshake del cliente;

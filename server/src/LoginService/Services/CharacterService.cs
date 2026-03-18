@@ -22,6 +22,9 @@ public sealed class CharacterService(AuthDbContext dbContext) : ICharacterServic
         var normalizedName = name.ToUpperInvariant();
         var characterClass = request.Class.Trim();
         var gender = request.Gender.Trim();
+        var faction = request.Faction.Trim();
+
+        var (mapId, sceneName) = ResolveStartingLocation(faction);
 
         if (await dbContext.Characters.AnyAsync(x => x.NormalizedName == normalizedName, cancellationToken))
         {
@@ -37,8 +40,10 @@ public sealed class CharacterService(AuthDbContext dbContext) : ICharacterServic
             NormalizedName = normalizedName,
             Class = characterClass,
             Gender = gender,
+            Faction = faction,
+            SceneName = sceneName,
             Level = GameplayRules.StartingLevel,
-            MapId = GameplayRules.StartingMapId,
+            MapId = mapId,
             PositionX = GameplayRules.StartingPositionX,
             PositionY = GameplayRules.StartingPositionY,
             CreatedAtUtc = now,
@@ -61,6 +66,16 @@ public sealed class CharacterService(AuthDbContext dbContext) : ICharacterServic
         return characters.Select(Map).ToList();
     }
 
+    private static (int MapId, string SceneName) ResolveStartingLocation(string faction)
+    {
+        return faction.Trim().ToUpperInvariant() switch
+        {
+            "ATHENS" => (GameplayRules.AthensStartingMapId, GameplayRules.AthensStartingScene),
+            "SPARTA" => (GameplayRules.SpartaStartingMapId, GameplayRules.SpartaStartingScene),
+            _ => throw new InvalidOperationException("Unsupported faction.")
+        };
+    }
+
     private static CharacterResponse Map(Character character)
     {
         return new CharacterResponse(
@@ -69,6 +84,8 @@ public sealed class CharacterService(AuthDbContext dbContext) : ICharacterServic
             character.Name,
             character.Class,
             character.Gender,
+            character.Faction,
+            character.SceneName,
             character.Level,
             character.MapId,
             character.PositionX,

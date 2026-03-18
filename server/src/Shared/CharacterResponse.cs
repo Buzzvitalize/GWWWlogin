@@ -6,6 +6,8 @@ public sealed record CharacterResponse(
     string Name,
     string Class,
     string Gender,
+    string Faction,
+    string SceneName,
     int Level,
     int MapId,
     float PositionX,

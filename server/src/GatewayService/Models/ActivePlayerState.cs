@@ -10,6 +10,10 @@ public sealed class ActivePlayerState
 
     public string CharacterName { get; init; } = string.Empty;
 
+    public string Faction { get; init; } = string.Empty;
+
+    public string SceneName { get; init; } = string.Empty;
+
     public int MapId { get; set; }
 
     public float PositionX { get; set; }
