@@ -1,16 +1,18 @@
 using GWWWlogin.GameServer.HostedServices;
 using GWWWlogin.GameServer.Models;
 using GWWWlogin.GameServer.World;
+using GWWWlogin.Shared.Maps;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<GameServerOptions>(builder.Configuration.GetSection(GameServerOptions.SectionName));
+builder.Services.AddSingleton<IClientMapCatalog, ClientMapCatalog>();
 builder.Services.AddSingleton<IGameWorldService, GameWorldService>();
 builder.Services.AddHostedService<ZoneSimulationHostedService>();
 
 var app = builder.Build();
 
-app.MapGet("/health", (IConfiguration configuration, IGameWorldService gameWorldService) =>
+app.MapGet("/health", (IConfiguration configuration, IGameWorldService gameWorldService, IClientMapCatalog mapCatalog) =>
 {
     var options = configuration.GetSection(GameServerOptions.SectionName).Get<GameServerOptions>() ?? new GameServerOptions();
     var maps = gameWorldService.GetMaps();
@@ -22,7 +24,7 @@ app.MapGet("/health", (IConfiguration configuration, IGameWorldService gameWorld
         host = options.Host,
         port = options.Port,
         zoneSize = options.ZoneSize,
-        configuredMaps = options.Maps.Count,
+        configuredMaps = mapCatalog.GetAll().Count,
         maps,
         utc = DateTime.UtcNow
     });

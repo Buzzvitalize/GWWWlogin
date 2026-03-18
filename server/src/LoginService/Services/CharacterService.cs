@@ -2,11 +2,12 @@ using GWWWlogin.LoginService.Data;
 using GWWWlogin.LoginService.Models;
 using GWWWlogin.LoginService.Rules;
 using GWWWlogin.Shared;
+using GWWWlogin.Shared.Maps;
 using Microsoft.EntityFrameworkCore;
 
 namespace GWWWlogin.LoginService.Services;
 
-public sealed class CharacterService(AuthDbContext dbContext) : ICharacterService
+public sealed class CharacterService(AuthDbContext dbContext, IClientMapCatalog mapCatalog) : ICharacterService
 {
     public async Task<CharacterResponse> CreateAsync(CreateCharacterRequest request, CancellationToken cancellationToken)
     {
@@ -24,7 +25,7 @@ public sealed class CharacterService(AuthDbContext dbContext) : ICharacterServic
         var gender = request.Gender.Trim();
         var faction = request.Faction.Trim();
 
-        var (mapId, sceneName) = ResolveStartingLocation(faction);
+        var startingMap = ResolveStartingLocation(faction);
 
         if (await dbContext.Characters.AnyAsync(x => x.NormalizedName == normalizedName, cancellationToken))
         {
@@ -41,11 +42,11 @@ public sealed class CharacterService(AuthDbContext dbContext) : ICharacterServic
             Class = characterClass,
             Gender = gender,
             Faction = faction,
-            SceneName = sceneName,
+            SceneName = startingMap.SceneName,
             Level = GameplayRules.StartingLevel,
-            MapId = mapId,
-            PositionX = GameplayRules.StartingPositionX,
-            PositionY = GameplayRules.StartingPositionY,
+            MapId = startingMap.MapId,
+            PositionX = startingMap.DefaultSpawnX,
+            PositionY = startingMap.DefaultSpawnY,
             CreatedAtUtc = now,
             UpdatedAtUtc = now
         };
@@ -66,14 +67,10 @@ public sealed class CharacterService(AuthDbContext dbContext) : ICharacterServic
         return characters.Select(Map).ToList();
     }
 
-    private static (int MapId, string SceneName) ResolveStartingLocation(string faction)
+    private ClientMapDefinition ResolveStartingLocation(string faction)
     {
-        return faction.Trim().ToUpperInvariant() switch
-        {
-            "ATHENS" => (GameplayRules.AthensStartingMapId, GameplayRules.AthensStartingScene),
-            "SPARTA" => (GameplayRules.SpartaStartingMapId, GameplayRules.SpartaStartingScene),
-            _ => throw new InvalidOperationException("Unsupported faction.")
-        };
+        return mapCatalog.GetStartingMap(faction)
+            ?? throw new InvalidOperationException("Unsupported faction.");
     }
 
     private static CharacterResponse Map(Character character)

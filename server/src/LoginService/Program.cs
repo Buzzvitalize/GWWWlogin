@@ -2,6 +2,7 @@ using GWWWlogin.LoginService.Data;
 using GWWWlogin.LoginService.Extensions;
 using GWWWlogin.LoginService.Services;
 using GWWWlogin.Shared;
+using GWWWlogin.Shared.Maps;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("AuthDb")));
 
+builder.Services.AddSingleton<IClientMapCatalog, ClientMapCatalog>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ICharacterService, CharacterService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
@@ -26,7 +28,7 @@ var servers = new List<ServerInfo>
     new(1, "Local Development", "127.1.1.110", 5999, "Online")
 };
 
-app.MapGet("/health", async (AuthDbContext dbContext, CancellationToken cancellationToken) =>
+app.MapGet("/health", async (AuthDbContext dbContext, IClientMapCatalog mapCatalog, CancellationToken cancellationToken) =>
 {
     var accountCount = await dbContext.Accounts.CountAsync(cancellationToken);
     var characterCount = await dbContext.Characters.CountAsync(cancellationToken);
@@ -39,7 +41,12 @@ app.MapGet("/health", async (AuthDbContext dbContext, CancellationToken cancella
         utc = DateTime.UtcNow,
         accounts = accountCount,
         characters = characterCount,
-        sessions = sessionCount
+        sessions = sessionCount,
+        startingMaps = new
+        {
+            Athens = mapCatalog.GetStartingMap("Athens")?.SceneName,
+            Sparta = mapCatalog.GetStartingMap("Sparta")?.SceneName
+        }
     });
 });
 
@@ -208,7 +215,6 @@ app.MapPost("/api/sessions/select-character", async (
         });
     }
 });
-
 
 app.MapPost("/api/sessions/{token}/gateway-ticket", async (
     string token,

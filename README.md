@@ -76,7 +76,7 @@ Lee `docs/getting-started.md` y luego revisa `server/src/LoginService/Program.cs
 
 ## Siguientes pasos sugeridos
 
-1. poblar `Maps` con NPCs, monstruos y puntos de entrada reales a partir de `Gw Client`;
-2. alinear `LoginService` para que las ubicaciones iniciales salgan del catálogo de mapas en vez de constantes locales;
-3. reemplazar el seed mínimo de monstruos por carga real desde archivos del cliente;
-4. validar una corrida completa con cliente usando `/maps` y `/world/maps` como inventario de escenas disponibles.
+1. extraer NPCs reales del cliente para poblar `AROUND` sin depender de seeds manuales;
+2. convertir `Address.ini` en transiciones navegables entre mapas y puntos de entrada/salida;
+3. enriquecer `GameServer` con spawns persistentes por escena en vez de sembrar solo una muestra derivada del catálogo del cliente;
+4. validar una corrida completa con cliente usando `/maps`, `/world/maps` y el arranque por facción desde el catálogo compartido.

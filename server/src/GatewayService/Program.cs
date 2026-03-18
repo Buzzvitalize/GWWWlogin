@@ -6,13 +6,14 @@ using GWWWlogin.GatewayService.Models;
 using GWWWlogin.GatewayService.Protocols;
 using GWWWlogin.GatewayService.Services;
 using GWWWlogin.GatewayService.World;
+using GWWWlogin.Shared.Maps;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<GatewayOptions>(builder.Configuration.GetSection(GatewayOptions.SectionName));
 builder.Services.Configure<GameServerBridgeOptions>(builder.Configuration.GetSection(GameServerBridgeOptions.SectionName));
-builder.Services.Configure<MapCatalogOptions>(builder.Configuration.GetSection(MapCatalogOptions.SectionName));
+builder.Services.AddSingleton<IClientMapCatalog, ClientMapCatalog>();
 builder.Services.AddDbContext<GatewayDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("AuthDb")));
 builder.Services.AddSingleton<IMapDefinitionService, MapDefinitionService>();

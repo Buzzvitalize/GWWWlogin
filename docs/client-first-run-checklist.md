@@ -28,7 +28,7 @@ Confirma este orden:
 
 Qué observar:
 - que `SimulationTick` avance;
-- que `/maps` y `/world/maps` devuelvan el catálogo configurado de escenas;
+- que `/maps` y `/world/maps` devuelvan el catálogo de escenas derivado del cliente;
 - que existan monstruos en `Athens_Newbie` o `Sparta_Newbie`;
 - que `/world/events` devuelva updates con `SequenceId`.
 
