@@ -20,14 +20,15 @@ Usaremos **C# con .NET 8** como objetivo del proyecto porque ofrece:
 ### Fase 1
 - levantar `LoginService`;
 - exponer un endpoint `health`;
-- exponer un endpoint de login falso para pruebas;
+- registrar cuentas en PostgreSQL;
+- autenticar cuentas con contraseña hasheada;
 - modelar respuesta de lista de servidores.
 
 ### Fase 2
-- cuentas reales en PostgreSQL;
-- hash de contraseñas;
-- tokens de sesión;
-- personajes.
+- personajes;
+- selección de personaje;
+- tokens de sesión más completos;
+- bans, roles y auditoría.
 
 ### Fase 3
 - gateway TCP;
@@ -44,11 +45,20 @@ Separa siempre:
 - **dominio**: reglas del juego;
 - **infraestructura**: DB, cache, logs.
 
-## 5. Próximo paso recomendado
+## 5. Qué estudiar primero
+
+Lee estos archivos en este orden:
+
+1. `server/src/LoginService/Program.cs`
+2. `server/src/LoginService/Services/AccountService.cs`
+3. `server/src/LoginService/Data/AuthDbContext.cs`
+4. `server/src/LoginService/Models/Account.cs`
+
+## 6. Próximo paso recomendado
 
 Cuando quieras, seguimos con una de estas tareas:
 
-1. agregar PostgreSQL;
-2. diseñar cuentas y personajes;
-3. crear gateway TCP;
-4. definir paquete de login del juego.
+1. crear la tabla de personajes;
+2. agregar migrations formales de EF Core;
+3. emitir session tokens persistidos;
+4. crear el gateway TCP del juego.

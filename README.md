@@ -11,10 +11,17 @@ Construir un backend propio, mantenible y documentado, sin copiar archivos propi
 
 ## Arquitectura inicial
 
-1. `LoginService`: autenticación, lista de servidores y token de sesión.
-2. `Shared`: contratos, modelos y utilidades comunes.
+1. `LoginService`: registro, autenticación, lista de servidores y token de sesión.
+2. `Shared`: contratos y utilidades comunes.
 3. `docs/`: notas del protocolo, fases del proyecto y decisiones técnicas.
 
-## Primer paso
+## Flujo actual
+
+1. registrar cuenta con `POST /api/accounts/register`;
+2. consultar salud con `GET /health`;
+3. obtener servidores con `GET /api/servers`;
+4. autenticar con `POST /api/login`.
+
+## Primer paso de estudio
 
 Lee `docs/getting-started.md` y luego revisa `server/src/LoginService/Program.cs`.
