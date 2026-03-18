@@ -66,6 +66,7 @@ Ahí también queda documentada la configuración nueva de `GameServer` (`Host`,
 
 Para la primera corrida con cliente, usa también `docs/client-first-run-checklist.md`, donde queda explicado qué tocar en `Gw Client/config.ini` para local y para GitHub/Codespaces.
 Si lo que quieres es instalar todo en tu propia PC desde cero, consulta también `docs/server-installation-guide.md`, donde queda detallado qué instalar, cómo levantar PostgreSQL con Docker, cómo arrancar los tres servicios y cuál es el estado real de la base de datos hoy.
+Si prefieres una versión todavía más guiada para **Windows**, con pasos muy concretos de instalación y arranque, revisa `docs/windows-local-setup-guide.md`.
 
 ## Referencia del cliente local
 
