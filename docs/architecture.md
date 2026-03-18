@@ -16,8 +16,9 @@ Responsable de:
 ### GatewayService
 Responsable de:
 - aceptar conexiones TCP iniciales;
-- anunciar estado básico del gateway;
-- preparar futura entrada al mapa.
+- ejecutar handshake inicial por sesión;
+- validar entrada al mapa usando la sesión persistida;
+- preparar futura lógica del mundo.
 
 ## Carpetas
 

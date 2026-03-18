@@ -41,7 +41,8 @@ Usaremos **C# con .NET 8** como objetivo del proyecto porque ofrece:
 ### Fase 3
 - gateway TCP;
 - handshake;
-- heartbeat;
+- entrada al mapa;
+- comandos base;
 - ticket de entrada al mapa;
 - catálogo de paquetes.
 
@@ -67,7 +68,7 @@ Lee estos archivos en este orden:
 
 Cuando terminemos este nivel, seguimos con una de estas tareas:
 
-1. implementar handshake inicial del gateway;
+1. ampliar handshake inicial del gateway;
 2. agregar migrations formales de EF Core;
-3. empezar entrada al mapa;
-4. agregar comandos base del juego.
+3. agregar comandos base del juego;
+4. empezar estado real del mapa.

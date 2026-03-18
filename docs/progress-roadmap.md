@@ -54,10 +54,12 @@ Cuando cambiemos de nivel lo vamos a dejar anotado aquí con esta frase:
 - proyecto `GatewayService`;
 - health check HTTP para gateway;
 - listener TCP inicial;
-- ticket de gateway desde `LoginService`.
+- ticket de gateway desde `LoginService`;
+- comando `HELLO <token>` en el gateway;
+- comando `ENTER_MAP <token>` en el gateway.
 
 ### Qué sigue después
-- handshake inicial del cliente;
-- entrada al mapa;
-- comandos base del juego;
+- ampliar handshake del cliente;
+- agregar comandos base del juego;
+- crear estado real del mapa;
 - maps reales.

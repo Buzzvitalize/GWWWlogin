@@ -32,7 +32,8 @@ Construir un backend propio, mantenible y documentado, sin copiar archivos propi
 ### Nivel 3 - Gateway y entrada al mapa
 9. preparar ticket de gateway con `POST /api/sessions/{token}/gateway-ticket`;
 10. levantar `GatewayService`;
-11. validar conexión TCP inicial al gateway.
+11. probar `HELLO <token>` en el gateway TCP;
+12. probar `ENTER_MAP <token>` en el gateway TCP.
 
 ## Seguimiento del progreso
 
