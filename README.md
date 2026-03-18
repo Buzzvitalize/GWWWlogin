@@ -63,7 +63,7 @@ Consulta `docs/progress-roadmap.md` para ver en qué nivel vamos, qué terminamo
 
 Consulta `docs/vscode-runbook.md` para abrir el repo en VS Code / GitHub y levantar `LoginService`, `GatewayService` y `GameServer` paso a paso.
 
-Para la primera corrida con cliente, usa también `docs/client-first-run-checklist.md`.
+Para la primera corrida con cliente, usa también `docs/client-first-run-checklist.md`, donde queda explicado qué tocar en `Gw Client/config.ini` para local y para GitHub/Codespaces.
 
 ## Referencia del cliente local
 

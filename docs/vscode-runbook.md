@@ -89,11 +89,28 @@ El compound sirve para arrancar los tres procesos desde VS Code.
 8. conectar cliente TCP al gateway;
 9. probar `HELLO`, `ENTER_MAP`, `AROUND` y `POLL`.
 
-## 8. Checklist operativa
+## 8. Configuración del cliente legado
 
-Consulta también `docs/client-first-run-checklist.md` para una pasada más operativa de endpoints, comandos y señales de problema.
+El cliente toma el host y puerto desde `Gw Client/config.ini`. Hoy el repo trae `IP=127.1.1.110`, pero debes alinearlo con el host real donde publiques `GatewayService`.
 
-## 9. Qué sigue después de esta guía
+### Local / VS Code
+
+- deja `IP` apuntando al host accesible por el cliente en tu PC;
+- ajusta `PORT` para que coincida con el puerto TCP real del gateway;
+- si cambias `Gateway:PublicHost`, mantén esa misma referencia en `Gw Client/config.ini`.
+
+### GitHub / Codespaces
+
+- no asumas una IP fija de GitHub;
+- publica el puerto TCP del gateway con port forwarding;
+- usa en `Gw Client/config.ini` el host/puerto público real que te entregue Codespaces o tu túnel;
+- si el backend anuncia `PublicHost`, actualízalo para que refleje ese mismo endpoint.
+
+## 9. Checklist operativa
+
+Consulta también `docs/client-first-run-checklist.md` para una pasada más operativa de endpoints, comandos y señales de problema, incluyendo ejemplos copy/paste para local y host remoto.
+
+## 10. Qué sigue después de esta guía
 
 Una vez que esto esté corrido de punta a punta, el siguiente paso recomendado es:
 
