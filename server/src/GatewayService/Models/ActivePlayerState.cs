@@ -23,4 +23,6 @@ public sealed class ActivePlayerState
     public int Level { get; init; }
 
     public DateTime EnteredMapAtUtc { get; init; }
+
+    public long LastSeenBroadcastSequence { get; set; }
 }

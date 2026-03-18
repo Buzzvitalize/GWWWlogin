@@ -4,7 +4,8 @@ namespace GWWWlogin.GatewayService.Broadcast;
 
 public interface IMapBroadcastService
 {
-    void Publish(int mapId, MapBroadcastEvent mapEvent);
+    MapBroadcastEvent Publish(int mapId, MapBroadcastEvent mapEvent);
 
-    IReadOnlyList<MapBroadcastEvent> Read(int mapId, int take);
+    IReadOnlyList<MapBroadcastEvent> ReadSince(int mapId, long afterSequenceId, int take);
+
 }

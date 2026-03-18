@@ -67,8 +67,11 @@ Cuando cambiemos de nivel lo vamos a dejar anotado aquí con esta frase:
 - snapshot inicial de entidades de mapa (`AROUND`).
 
 ### Qué sigue después
-- ampliar handshake del cliente;
-- crear estado real del mapa con entidades;
-- ampliar broadcast entre jugadores;
+- crear estado real del mapa con entidades vivas y actualización por zona;
+- sincronizar `AROUND` y `POLL` con rangos/visibilidad reales;
 - usar `Localization/en_us` y `Map/` como referencia del cliente;
+- ampliar handshake del cliente con más datos de escena;
 - maps reales.
+
+### Siguiente paso recomendado en esta fase
+- mantener el Nivel 3 y continuar con visibilidad/rangos por mapa antes de pasar al siguiente bloque.

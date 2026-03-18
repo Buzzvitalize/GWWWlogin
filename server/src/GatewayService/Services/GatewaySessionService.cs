@@ -103,7 +103,8 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
 
         var population = mapStateService.GetPopulation(state.MapId);
 
-        mapBroadcastService.Publish(state.MapId, new MapBroadcastEvent(
+        var enterEvent = mapBroadcastService.Publish(state.MapId, new MapBroadcastEvent(
+            0,
             "ENTER",
             state.SessionId,
             state.CharacterName,
@@ -111,6 +112,8 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
             state.PositionX,
             state.PositionY,
             DateTime.UtcNow));
+
+        state.LastSeenBroadcastSequence = enterEvent.SequenceId;
 
         var mapDefinition = mapDefinitionService.GetById(state.MapId);
         var npcCount = mapDefinition?.Npcs.Count ?? 0;
@@ -201,7 +204,8 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
         session.LastSeenAtUtc = DateTime.UtcNow;
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        mapBroadcastService.Publish(state.MapId, new MapBroadcastEvent(
+        var moveEvent = mapBroadcastService.Publish(state.MapId, new MapBroadcastEvent(
+            0,
             "MOVE",
             state.SessionId,
             state.CharacterName,
@@ -209,6 +213,8 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
             state.PositionX,
             state.PositionY,
             DateTime.UtcNow));
+
+        state.LastSeenBroadcastSequence = moveEvent.SequenceId;
 
         return new GatewayCommandResult(
             true,
@@ -232,6 +238,7 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
         }
 
         mapBroadcastService.Publish(state.MapId, new MapBroadcastEvent(
+            0,
             "LEAVE",
             state.SessionId,
             state.CharacterName,
@@ -262,8 +269,17 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
             return new GatewayCommandResult(false, "ERROR player_not_in_map");
         }
 
-        var events = mapBroadcastService.Read(state.MapId, 5);
-        var payload = string.Join("|", events.Select(x => $"{x.EventType},{x.CharacterName},{x.PositionX},{x.PositionY}"));
+        var events = mapBroadcastService.ReadSince(state.MapId, state.LastSeenBroadcastSequence, 20);
+        if (events.Count > 0)
+        {
+            state.LastSeenBroadcastSequence = events[^1].SequenceId;
+        }
+
+        var visibleEvents = events
+            .Where(x => x.SessionId != state.SessionId)
+            .ToList();
+
+        var payload = string.Join("|", visibleEvents.Select(x => $"{x.SequenceId},{x.EventType},{x.CharacterName},{x.PositionX},{x.PositionY}"));
         return new GatewayCommandResult(true, $"EVENTS {payload}");
     }
 
