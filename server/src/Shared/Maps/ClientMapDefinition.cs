@@ -8,4 +8,5 @@ public sealed record ClientMapDefinition(
     float DefaultSpawnX,
     float DefaultSpawnY,
     IReadOnlyList<ClientMapAddress> Addresses,
+    IReadOnlyList<ClientNpcTemplate> Npcs,
     IReadOnlyList<ClientMonsterTemplate> Monsters);

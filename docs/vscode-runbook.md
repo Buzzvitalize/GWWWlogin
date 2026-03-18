@@ -75,6 +75,7 @@ El compound sirve para arrancar los tres procesos desde VS Code.
 - `GET /health`
 - `GET /maps`
 - `GET /world/maps`
+- `GET /world/transitions`
 - `GET /world/monsters`
 - `GET /world/events`
 
@@ -93,7 +94,7 @@ El compound sirve para arrancar los tres procesos desde VS Code.
 
 ## 8. Configuración del cliente legado
 
-El cliente toma el host y puerto desde `Gw Client/config.ini`. Hoy el repo trae `IP=127.1.1.110`, pero debes alinearlo con el host real donde publiques `GatewayService`.
+El cliente toma el host y puerto desde `Gw Client/config.ini`. Ahora el repo ya deja `PORT=6001` para alinearlo con `GatewayService`, y debes ajustar el host real donde publiques el gateway.
 
 ### Local / VS Code
 

@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace GWWWlogin.Shared.Maps;
 
@@ -42,6 +43,8 @@ public sealed class ClientMapCatalog : IClientMapCatalog
         var repoRoot = ResolveRepositoryRoot();
         var mapRoot = Path.Combine(repoRoot, "Gw Client", "Map");
         var monsterRoot = Path.Combine(repoRoot, "Gw Client", "Localization", "en_us", "Monster");
+        var textRoot = Path.Combine(repoRoot, "Gw Client", "Localization", "en_us", "Text");
+        var settingsRoot = Path.Combine(repoRoot, "Gw Client", "Localization", "en_us", "Settings", "Sys");
 
         if (!Directory.Exists(mapRoot))
         {
@@ -60,6 +63,9 @@ public sealed class ClientMapCatalog : IClientMapCatalog
         if (scenes.Remove("Sparta_Newbie")) orderedScenes.Add("Sparta_Newbie");
         orderedScenes.AddRange(scenes);
 
+        var npcNames = LoadNpcNames(Path.Combine(textRoot, "NpcName.dat"));
+        var npcsByScene = LoadNpcPositions(Path.Combine(settingsRoot, "Quest.xml"), npcNames, orderedScenes);
+
         var results = new List<ClientMapDefinition>();
         for (var index = 0; index < orderedScenes.Count; index++)
         {
@@ -77,6 +83,9 @@ public sealed class ClientMapCatalog : IClientMapCatalog
             var monsters = Directory.Exists(monsterFolderPath)
                 ? LoadMonsters(Path.Combine(monsterFolderPath, "Monster.ini"))
                 : [];
+            var npcs = npcsByScene.TryGetValue(sceneName, out var sceneNpcs)
+                ? sceneNpcs
+                : [];
 
             var defaultSpawn = ResolveDefaultSpawn(sceneName, addresses);
             results.Add(new ClientMapDefinition(
@@ -87,6 +96,7 @@ public sealed class ClientMapCatalog : IClientMapCatalog
                 defaultSpawn.PositionX,
                 defaultSpawn.PositionY,
                 addresses,
+                npcs,
                 monsters));
         }
 
@@ -97,9 +107,103 @@ public sealed class ClientMapCatalog : IClientMapCatalog
     {
         return
         [
-            new ClientMapDefinition(1001, "Athens_Newbie", "Gw Client/Map/TerrAthens_Newbie", "Gw Client/Localization/en_us/Monster/Athens_Newbie", 102f, -217f, [], []),
-            new ClientMapDefinition(1002, "Sparta_Newbie", "Gw Client/Map/TerrSparta_Newbie", "Gw Client/Localization/en_us/Monster/Sparta_Newbie", 102f, -217f, [], [])
+            new ClientMapDefinition(1001, "Athens_Newbie", "Gw Client/Map/TerrAthens_Newbie", "Gw Client/Localization/en_us/Monster/Athens_Newbie", 102f, -217f, [], [], []),
+            new ClientMapDefinition(1002, "Sparta_Newbie", "Gw Client/Map/TerrSparta_Newbie", "Gw Client/Localization/en_us/Monster/Sparta_Newbie", 102f, -217f, [], [], [])
         ];
+    }
+
+    private static Dictionary<string, IReadOnlyList<ClientNpcTemplate>> LoadNpcPositions(
+        string questXmlPath,
+        IReadOnlyDictionary<string, string> npcNames,
+        IReadOnlyList<string> sceneNames)
+    {
+        if (!File.Exists(questXmlPath))
+        {
+            return new Dictionary<string, IReadOnlyList<ClientNpcTemplate>>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        var sceneLookup = sceneNames.OrderByDescending(x => x.Length).ToList();
+        var buckets = new Dictionary<string, Dictionary<string, ClientNpcTemplate>>(StringComparer.OrdinalIgnoreCase);
+
+        var document = XDocument.Load(questXmlPath);
+        foreach (var element in document.Root?.Elements() ?? Enumerable.Empty<XElement>())
+        {
+            RegisterNpc(element.Attribute("GiverName")?.Value, element.Attribute("Giver")?.Value);
+            RegisterNpc(element.Attribute("ResponderName")?.Value, element.Attribute("Responder")?.Value);
+        }
+
+        return buckets.ToDictionary(
+            x => x.Key,
+            x => (IReadOnlyList<ClientNpcTemplate>)x.Value.Values.OrderBy(npc => npc.NpcKey, StringComparer.OrdinalIgnoreCase).ToList(),
+            StringComparer.OrdinalIgnoreCase);
+
+        void RegisterNpc(string? npcKey, string? rawCoordinate)
+        {
+            if (string.IsNullOrWhiteSpace(npcKey) || string.IsNullOrWhiteSpace(rawCoordinate))
+            {
+                return;
+            }
+
+            var sceneName = ResolveSceneNameFromNpcKey(npcKey, sceneLookup);
+            if (sceneName is null)
+            {
+                return;
+            }
+
+            if (!TryParseQuestCoordinate(rawCoordinate, out var positionX, out var positionY))
+            {
+                return;
+            }
+
+            var displayName = npcNames.TryGetValue(npcKey, out var npcName) && !string.IsNullOrWhiteSpace(npcName)
+                ? npcName
+                : npcKey;
+
+            if (!buckets.TryGetValue(sceneName, out var byKey))
+            {
+                byKey = new Dictionary<string, ClientNpcTemplate>(StringComparer.OrdinalIgnoreCase);
+                buckets[sceneName] = byKey;
+            }
+
+            byKey.TryAdd(npcKey, new ClientNpcTemplate(npcKey, displayName, positionX, positionY));
+        }
+    }
+
+    private static string? ResolveSceneNameFromNpcKey(string npcKey, IReadOnlyList<string> sceneNames)
+    {
+        return sceneNames.FirstOrDefault(scene =>
+            npcKey.StartsWith(scene + "_", StringComparison.OrdinalIgnoreCase) ||
+            npcKey.StartsWith(scene, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool TryParseQuestCoordinate(string rawCoordinate, out float positionX, out float positionY)
+    {
+        var parts = rawCoordinate.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length != 2)
+        {
+            positionX = 0;
+            positionY = 0;
+            return false;
+        }
+
+        return TryParseFloat(parts[0], out positionX) && TryParseFloat(parts[1], out positionY);
+    }
+
+    private static IReadOnlyDictionary<string, string> LoadNpcNames(string filePath)
+    {
+        if (!File.Exists(filePath))
+        {
+            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        return ReadText(filePath)
+            .Replace("\r", string.Empty, StringComparison.Ordinal)
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+            .Select(line => line.Trim())
+            .Where(line => !string.IsNullOrWhiteSpace(line))
+            .Select(line => line.Split('\t', 2, StringSplitOptions.TrimEntries))
+            .Where(parts => parts.Length == 2)
+            .ToDictionary(parts => parts[0], parts => parts[1], StringComparer.OrdinalIgnoreCase);
     }
 
     private static (float PositionX, float PositionY) ResolveDefaultSpawn(string sceneName, IReadOnlyList<ClientMapAddress> addresses)
@@ -151,9 +255,7 @@ public sealed class ClientMapCatalog : IClientMapCatalog
             if (coordinateMatch.Success && int.TryParse(coordinateMatch.Groups["index"].Value, out var coordinateIndex))
             {
                 var parts = pair.Value.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length == 2 &&
-                    float.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out var x) &&
-                    float.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var y))
+                if (parts.Length == 2 && TryParseFloat(parts[0], out var x) && TryParseFloat(parts[1], out var y))
                 {
                     coordinates[coordinateIndex] = (x, y);
                 }
@@ -229,6 +331,11 @@ public sealed class ClientMapCatalog : IClientMapCatalog
         }
 
         return result;
+    }
+
+    private static bool TryParseFloat(string rawValue, out float value)
+    {
+        return float.TryParse(rawValue.Trim().TrimEnd('f', 'F'), NumberStyles.Float, CultureInfo.InvariantCulture, out value);
     }
 
     private static string ReadText(string filePath)

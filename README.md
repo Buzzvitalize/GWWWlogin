@@ -76,7 +76,7 @@ Lee `docs/getting-started.md` y luego revisa `server/src/LoginService/Program.cs
 
 ## Siguientes pasos sugeridos
 
-1. extraer NPCs reales del cliente para poblar `AROUND` sin depender de seeds manuales;
-2. convertir `Address.ini` en transiciones navegables entre mapas y puntos de entrada/salida;
-3. enriquecer `GameServer` con spawns persistentes por escena en vez de sembrar solo una muestra derivada del catálogo del cliente;
-4. validar una corrida completa con cliente usando `/maps`, `/world/maps` y el arranque por facción desde el catálogo compartido.
+1. conectar las transiciones derivadas de `Address.ini` con un comando real de cambio de mapa en el gateway;
+2. ampliar la extracción de NPCs reales más allá de ciudades base para cubrir mapas newbie y zonas abiertas;
+3. sustituir la siembra sintética de monstruos por spawns persistentes/importados por escena;
+4. validar la conexión end-to-end del cliente con `Gw Client/config.ini` ya alineado a `GatewayService` (`PORT=6001`).

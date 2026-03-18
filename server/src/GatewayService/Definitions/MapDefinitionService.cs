@@ -10,7 +10,13 @@ public sealed class MapDefinitionService(IClientMapCatalog mapCatalog) : IMapDef
             map.SceneName,
             map.TerrainFolder,
             map.MonsterFolder,
-            [],
+            map.Npcs
+                .Select(npc => new NpcSpawn(
+                    npc.NpcKey,
+                    npc.DisplayName,
+                    npc.PositionX,
+                    npc.PositionY))
+                .ToList(),
             map.Monsters
                 .Select((monster, index) => new MonsterSpawn(
                     monster.MonsterKey,

@@ -23,12 +23,14 @@ Confirma este orden:
 - `GET /health`
 - `GET /maps`
 - `GET /world/maps`
+- `GET /world/transitions?mapId=1001`
 - `GET /world/monsters?mapId=1001`
 - `GET /world/events`
 
 Qué observar:
 - que `SimulationTick` avance;
 - que `/maps` y `/world/maps` devuelvan el catálogo de escenas derivado del cliente;
+- que `/world/transitions` devuelva puntos de entrada/salida del mapa;
 - que existan monstruos en `Athens_Newbie` o `Sparta_Newbie`;
 - que `/world/events` devuelva updates con `SequenceId`.
 
@@ -48,7 +50,7 @@ Configuración actual del repo:
 
 ```ini
 [SERVER]
-PORT=5999
+PORT=6001
 IP=127.1.1.110
 ```
 
@@ -100,6 +102,7 @@ curl -fsS http://127.0.0.1:5000/health
 curl -fsS http://127.0.0.1:5100/health
 curl -fsS http://127.0.0.1:5100/maps
 curl -fsS http://127.0.0.1:5100/world/maps
+curl -fsS "http://127.0.0.1:5100/world/transitions?mapId=1001"
 curl -fsS "http://127.0.0.1:5100/world/monsters?mapId=1001"
 curl -fsS http://127.0.0.1:5100/world/events
 curl -fsS http://127.0.0.1:5200/health
@@ -164,7 +167,7 @@ printf 'POLL REEMPLAZAR_TOKEN\n' | nc 127.0.0.1 6001
 
 ### AROUND
 - jugadores cercanos si existen;
-- NPCs del mapa;
+- NPCs reales del mapa cuando existan en el catálogo derivado del cliente;
 - monstruos vivos provenientes del bridge de `GameServer`.
 
 ### POLL
