@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>GWWWlogin.Shared</AssemblyName>
+    <RootNamespace>GWWWlogin.Shared</RootNamespace>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,47 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "compose-up",
+      "type": "shell",
+      "command": "docker compose up -d",
+      "options": {
+        "cwd": "${workspaceFolder}/server"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "compose-down",
+      "type": "shell",
+      "command": "docker compose down",
+      "options": {
+        "cwd": "${workspaceFolder}/server"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "build-server-sln",
+      "type": "shell",
+      "command": "dotnet build ${workspaceFolder}/server/GWWWlogin.Server.sln",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "run-loginservice",
+      "type": "shell",
+      "command": "dotnet run --project ${workspaceFolder}/server/src/LoginService/LoginService.csproj",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "run-gatewayservice",
+      "type": "shell",
+      "command": "dotnet run --project ${workspaceFolder}/server/src/GatewayService/GatewayService.csproj",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "run-gameserver",
+      "type": "shell",
+      "command": "dotnet run --project ${workspaceFolder}/server/src/GameServer/GameServer.csproj",
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}

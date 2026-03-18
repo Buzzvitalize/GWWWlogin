@@ -1,0 +1,533 @@
+using GWWWlogin.GatewayService.Broadcast;
+using GWWWlogin.GatewayService.Data;
+using GWWWlogin.GatewayService.Definitions;
+using GWWWlogin.GatewayService.Models;
+using GWWWlogin.GatewayService.Protocols;
+using GWWWlogin.GatewayService.World;
+using GWWWlogin.Shared;
+using GWWWlogin.Shared.Maps;
+using Microsoft.EntityFrameworkCore;
+
+namespace GWWWlogin.GatewayService.Services;
+
+public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateService mapStateService, IMapDefinitionService mapDefinitionService, IMapBroadcastService mapBroadcastService, IGameServerBridgeClient gameServerBridgeClient, IClientMapCatalog mapCatalog) : IGatewaySessionService
+{
+    private const float VisibilityRadius = 180f;
+
+    public async Task<GatewayCommandResult> HandleCommandAsync(string commandLine, CancellationToken cancellationToken)
+    {
+        var parts = commandLine.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (parts.Length < 2)
+        {
+            return new GatewayCommandResult(false, "ERROR invalid_command_format");
+        }
+
+        var command = parts[0].ToUpperInvariant();
+        var token = parts[1];
+
+        return command switch
+        {
+            "HELLO" when parts.Length == 2 => await HandleHelloAsync(token, cancellationToken),
+            "ENTER_MAP" when parts.Length == 2 => await HandleEnterMapAsync(token, cancellationToken),
+            "PING" when parts.Length == 2 => await HandlePingAsync(token, cancellationToken),
+            "WHOAMI" when parts.Length == 2 => await HandleWhoAmIAsync(token, cancellationToken),
+            "MOVE" when parts.Length == 4 && float.TryParse(parts[2], out var x) && float.TryParse(parts[3], out var y) => await HandleMoveAsync(token, x, y, cancellationToken),
+            "TRAVEL" when parts.Length == 3 && int.TryParse(parts[2], out var transitionIndex) => await HandleTravelAsync(token, transitionIndex, cancellationToken),
+            "LEAVE" when parts.Length == 2 => await HandleLeaveAsync(token, cancellationToken),
+            "POLL" when parts.Length == 2 => await HandlePollAsync(token, cancellationToken),
+            "AROUND" when parts.Length == 2 => await HandleAroundAsync(token, cancellationToken),
+            _ => new GatewayCommandResult(false, "ERROR unknown_command")
+        };
+    }
+
+    private async Task<GatewayCommandResult> HandleHelloAsync(string token, CancellationToken cancellationToken)
+    {
+        var session = await dbContext.Sessions
+            .Include(x => x.SelectedCharacter)
+            .SingleOrDefaultAsync(x => x.Token == token, cancellationToken);
+
+        if (session is null)
+        {
+            return new GatewayCommandResult(false, "ERROR session_not_found");
+        }
+
+        if (session.ExpiresAtUtc <= DateTime.UtcNow)
+        {
+            return new GatewayCommandResult(false, "ERROR session_expired");
+        }
+
+        if (session.SelectedCharacter is null)
+        {
+            return new GatewayCommandResult(false, "ERROR character_not_selected");
+        }
+
+        session.LastSeenAtUtc = DateTime.UtcNow;
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return new GatewayCommandResult(
+            true,
+            GatewayProtocolSerializer.FormatHandshake(
+                session.AccountId,
+                session.SelectedCharacter,
+                VisibilityRadius,
+                GatewayProtocolSerializer.WorldEventVersion));
+    }
+
+    private async Task<GatewayCommandResult> HandleEnterMapAsync(string token, CancellationToken cancellationToken)
+    {
+        var session = await dbContext.Sessions
+            .Include(x => x.SelectedCharacter)
+            .SingleOrDefaultAsync(x => x.Token == token, cancellationToken);
+
+        if (session is null)
+        {
+            return new GatewayCommandResult(false, "ERROR session_not_found");
+        }
+
+        if (session.ExpiresAtUtc <= DateTime.UtcNow)
+        {
+            return new GatewayCommandResult(false, "ERROR session_expired");
+        }
+
+        if (session.SelectedCharacter is null)
+        {
+            return new GatewayCommandResult(false, "ERROR character_not_selected");
+        }
+
+        session.LastSeenAtUtc = DateTime.UtcNow;
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        var character = session.SelectedCharacter;
+        var state = mapStateService.EnterMap(
+            session.Id,
+            session.AccountId,
+            character.Id,
+            character.Name,
+            character.Faction,
+            character.SceneName,
+            character.MapId,
+            character.PositionX,
+            character.PositionY,
+            character.Level);
+
+        var population = mapStateService.GetPopulation(state.MapId);
+
+        var enterEvent = mapBroadcastService.Publish(state.MapId, new MapBroadcastEvent(
+            0,
+            "ENTER",
+            state.SessionId,
+            state.CharacterName,
+            state.SceneName,
+            state.PositionX,
+            state.PositionY,
+            DateTime.UtcNow,
+            "player",
+            state.CharacterId.ToString()));
+
+        state.LastSeenBroadcastSequence = enterEvent.SequenceId;
+
+        var mapDefinition = mapDefinitionService.GetById(state.MapId);
+        var npcCount = mapDefinition?.Npcs.Count ?? 0;
+        var monsterCount = mapDefinition?.Monsters.Count ?? 0;
+
+        return new GatewayCommandResult(
+            true,
+            $"ENTER_MAP_OK {state.SceneName} {state.MapId} {state.PositionX} {state.PositionY} {state.Level} {population} {npcCount} {monsterCount}");
+    }
+
+    private async Task<GatewayCommandResult> HandlePingAsync(string token, CancellationToken cancellationToken)
+    {
+        var session = await dbContext.Sessions
+            .SingleOrDefaultAsync(x => x.Token == token, cancellationToken);
+
+        if (session is null)
+        {
+            return new GatewayCommandResult(false, "ERROR session_not_found");
+        }
+
+        if (session.ExpiresAtUtc <= DateTime.UtcNow)
+        {
+            return new GatewayCommandResult(false, "ERROR session_expired");
+        }
+
+        session.LastSeenAtUtc = DateTime.UtcNow;
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return new GatewayCommandResult(true, $"PONG {session.Id}");
+    }
+
+    private async Task<GatewayCommandResult> HandleWhoAmIAsync(string token, CancellationToken cancellationToken)
+    {
+        var session = await dbContext.Sessions
+            .Include(x => x.SelectedCharacter)
+            .SingleOrDefaultAsync(x => x.Token == token, cancellationToken);
+
+        if (session is null)
+        {
+            return new GatewayCommandResult(false, "ERROR session_not_found");
+        }
+
+        if (session.ExpiresAtUtc <= DateTime.UtcNow)
+        {
+            return new GatewayCommandResult(false, "ERROR session_expired");
+        }
+
+        if (session.SelectedCharacter is null)
+        {
+            return new GatewayCommandResult(false, "ERROR character_not_selected");
+        }
+
+        var mapState = mapStateService.GetBySession(session.Id);
+        if (mapState is not null)
+        {
+            return new GatewayCommandResult(
+                true,
+                $"PLAYER_INFO {mapState.CharacterName} {mapState.Faction} {mapState.SceneName} {mapState.MapId} {mapState.PositionX} {mapState.PositionY} {mapState.Level}");
+        }
+
+        var character = session.SelectedCharacter;
+        return new GatewayCommandResult(
+            true,
+            $"PLAYER_INFO {character.Name} {character.Faction} {character.SceneName} {character.MapId} {character.PositionX} {character.PositionY} {character.Level}");
+    }
+
+    private async Task<GatewayCommandResult> HandleMoveAsync(string token, float positionX, float positionY, CancellationToken cancellationToken)
+    {
+        var session = await dbContext.Sessions
+            .SingleOrDefaultAsync(x => x.Token == token, cancellationToken);
+
+        if (session is null)
+        {
+            return new GatewayCommandResult(false, "ERROR session_not_found");
+        }
+
+        if (session.ExpiresAtUtc <= DateTime.UtcNow)
+        {
+            return new GatewayCommandResult(false, "ERROR session_expired");
+        }
+
+        var state = mapStateService.Move(session.Id, positionX, positionY);
+        if (state is null)
+        {
+            return new GatewayCommandResult(false, "ERROR player_not_in_map");
+        }
+
+        session.LastSeenAtUtc = DateTime.UtcNow;
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        var moveEvent = mapBroadcastService.Publish(state.MapId, new MapBroadcastEvent(
+            0,
+            "MOVE",
+            state.SessionId,
+            state.CharacterName,
+            state.SceneName,
+            state.PositionX,
+            state.PositionY,
+            DateTime.UtcNow,
+            "player",
+            state.CharacterId.ToString()));
+
+        state.LastSeenBroadcastSequence = moveEvent.SequenceId;
+
+        return new GatewayCommandResult(
+            true,
+            $"MOVE_OK {state.MapId} {state.PositionX} {state.PositionY}");
+    }
+
+    private async Task<GatewayCommandResult> HandleTravelAsync(string token, int transitionIndex, CancellationToken cancellationToken)
+    {
+        var session = await dbContext.Sessions
+            .Include(x => x.SelectedCharacter)
+            .SingleOrDefaultAsync(x => x.Token == token, cancellationToken);
+
+        if (session is null)
+        {
+            return new GatewayCommandResult(false, "ERROR session_not_found");
+        }
+
+        if (session.ExpiresAtUtc <= DateTime.UtcNow)
+        {
+            return new GatewayCommandResult(false, "ERROR session_expired");
+        }
+
+        var state = mapStateService.GetBySession(session.Id);
+        if (state is null)
+        {
+            return new GatewayCommandResult(false, "ERROR player_not_in_map");
+        }
+
+        var currentMap = mapCatalog.GetById(state.MapId);
+        if (currentMap is null)
+        {
+            return new GatewayCommandResult(false, "ERROR map_definition_not_found");
+        }
+
+        if (transitionIndex <= 0 || transitionIndex > currentMap.Addresses.Count)
+        {
+            return new GatewayCommandResult(false, "ERROR transition_not_found");
+        }
+
+        var transition = currentMap.Addresses[transitionIndex - 1];
+        var destinationMap = ResolveDestinationMap(currentMap, transition.Name);
+        var destinationScene = destinationMap?.SceneName ?? currentMap.SceneName;
+        var destinationMapId = destinationMap?.MapId ?? currentMap.MapId;
+        var destinationX = destinationMap?.DefaultSpawnX ?? transition.PositionX;
+        var destinationY = destinationMap?.DefaultSpawnY ?? transition.PositionY;
+
+        var previousMapId = state.MapId;
+        var previousScene = state.SceneName;
+        var previousX = state.PositionX;
+        var previousY = state.PositionY;
+
+        var nextState = mapStateService.Travel(session.Id, destinationScene, destinationMapId, destinationX, destinationY);
+        if (nextState is null)
+        {
+            return new GatewayCommandResult(false, "ERROR player_not_in_map");
+        }
+
+        if (session.SelectedCharacter is not null)
+        {
+            session.SelectedCharacter.SceneName = destinationScene;
+            session.SelectedCharacter.MapId = destinationMapId;
+            session.SelectedCharacter.PositionX = destinationX;
+            session.SelectedCharacter.PositionY = destinationY;
+            session.SelectedCharacter.UpdatedAtUtc = DateTime.UtcNow;
+        }
+
+        session.LastSeenAtUtc = DateTime.UtcNow;
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        mapBroadcastService.Publish(previousMapId, new MapBroadcastEvent(
+            0,
+            "LEAVE",
+            nextState.SessionId,
+            nextState.CharacterName,
+            previousScene,
+            previousX,
+            previousY,
+            DateTime.UtcNow,
+            "player",
+            nextState.CharacterId.ToString()));
+
+        var enterEvent = mapBroadcastService.Publish(destinationMapId, new MapBroadcastEvent(
+            0,
+            "ENTER",
+            nextState.SessionId,
+            nextState.CharacterName,
+            destinationScene,
+            destinationX,
+            destinationY,
+            DateTime.UtcNow,
+            "player",
+            nextState.CharacterId.ToString()));
+
+        nextState.LastSeenBroadcastSequence = enterEvent.SequenceId;
+        nextState.LastSeenGameServerSequence = 0;
+
+        return new GatewayCommandResult(true, $"TRAVEL_OK {destinationScene} {destinationMapId} {destinationX} {destinationY} {transitionIndex} {transition.Name}");
+    }
+
+    private async Task<GatewayCommandResult> HandleLeaveAsync(string token, CancellationToken cancellationToken)
+    {
+        var session = await dbContext.Sessions
+            .SingleOrDefaultAsync(x => x.Token == token, cancellationToken);
+
+        if (session is null)
+        {
+            return new GatewayCommandResult(false, "ERROR session_not_found");
+        }
+
+        var state = mapStateService.Leave(session.Id);
+        if (state is null)
+        {
+            return new GatewayCommandResult(false, "ERROR player_not_in_map");
+        }
+
+        mapBroadcastService.Publish(state.MapId, new MapBroadcastEvent(
+            0,
+            "LEAVE",
+            state.SessionId,
+            state.CharacterName,
+            state.SceneName,
+            state.PositionX,
+            state.PositionY,
+            DateTime.UtcNow,
+            "player",
+            state.CharacterId.ToString()));
+
+        session.LastSeenAtUtc = DateTime.UtcNow;
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return new GatewayCommandResult(true, $"LEAVE_OK {state.SceneName} {state.MapId}");
+    }
+
+    private async Task<GatewayCommandResult> HandlePollAsync(string token, CancellationToken cancellationToken)
+    {
+        var session = await dbContext.Sessions
+            .SingleOrDefaultAsync(x => x.Token == token, cancellationToken);
+
+        if (session is null)
+        {
+            return new GatewayCommandResult(false, "ERROR session_not_found");
+        }
+
+        var state = mapStateService.GetBySession(session.Id);
+        if (state is null)
+        {
+            return new GatewayCommandResult(false, "ERROR player_not_in_map");
+        }
+
+        var playerEvents = mapBroadcastService.ReadSince(state.MapId, state.LastSeenBroadcastSequence, 20);
+        if (playerEvents.Count > 0)
+        {
+            state.LastSeenBroadcastSequence = playerEvents[^1].SequenceId;
+        }
+
+        var runtimeEvents = await gameServerBridgeClient.GetEventsAsync(state.LastSeenGameServerSequence, 20, cancellationToken);
+        if (runtimeEvents.Count > 0)
+        {
+            state.LastSeenGameServerSequence = runtimeEvents[^1].SequenceId;
+        }
+
+        var visiblePlayerEvents = playerEvents
+            .Where(x => x.SessionId != state.SessionId)
+            .Where(x => IsWithinVisibilityRange(state, x.PositionX, x.PositionY));
+
+        var visibleRuntimeEvents = runtimeEvents
+            .Where(x => x.MapId == state.MapId)
+            .Where(x => IsWithinVisibilityRange(state, x.PositionX, x.PositionY))
+            .Select(ToMapBroadcastEvent);
+
+        var visibleEvents = visiblePlayerEvents
+            .Concat(visibleRuntimeEvents)
+            .OrderBy(x => x.OccurredAtUtc)
+            .Take(20)
+            .ToList();
+
+        return new GatewayCommandResult(true, GatewayProtocolSerializer.FormatWorldEvents(visibleEvents));
+    }
+
+    private async Task<GatewayCommandResult> HandleAroundAsync(string token, CancellationToken cancellationToken)
+    {
+        var session = await dbContext.Sessions
+            .SingleOrDefaultAsync(x => x.Token == token, cancellationToken);
+
+        if (session is null)
+        {
+            return new GatewayCommandResult(false, "ERROR session_not_found");
+        }
+
+        var state = mapStateService.GetBySession(session.Id);
+        if (state is null)
+        {
+            return new GatewayCommandResult(false, "ERROR player_not_in_map");
+        }
+
+        var players = mapStateService.GetPlayersInRange(state.MapId, state.PositionX, state.PositionY, VisibilityRadius)
+            .Where(x => x.SessionId != state.SessionId)
+            .ToList();
+        var npcs = mapStateService.GetNpcsInRange(state.MapId, state.PositionX, state.PositionY, VisibilityRadius);
+        var monsters = await GetVisibleMonstersAsync(state, cancellationToken);
+
+        return new GatewayCommandResult(true, GatewayProtocolSerializer.FormatAround(players, npcs, monsters));
+    }
+
+    private async Task<IReadOnlyList<MonsterSpawnState>> GetVisibleMonstersAsync(ActivePlayerState observer, CancellationToken cancellationToken)
+    {
+        var bridgeMonsters = await gameServerBridgeClient.GetMonstersAsync(observer.MapId, cancellationToken);
+        if (bridgeMonsters.Count > 0)
+        {
+            return bridgeMonsters
+                .Where(x => IsWithinVisibilityRange(observer, x.PositionX, x.PositionY))
+                .Select(ToMonsterSpawnState)
+                .ToList();
+        }
+
+        return mapStateService.GetMonstersInRange(observer.MapId, observer.PositionX, observer.PositionY, VisibilityRadius);
+    }
+
+    private static MonsterSpawnState ToMonsterSpawnState(WorldBridgeMonsterSnapshot monster)
+    {
+        return new MonsterSpawnState(
+            monster.InstanceId,
+            string.Empty,
+            monster.DisplayName,
+            monster.SceneName,
+            monster.MapId,
+            monster.PositionX,
+            monster.PositionY,
+            monster.ZoneKey,
+            monster.IsAlive,
+            monster.LastUpdatedAtUtc);
+    }
+
+    private static MapBroadcastEvent ToMapBroadcastEvent(WorldBridgeEntityUpdate update)
+    {
+        return new MapBroadcastEvent(
+            update.SequenceId,
+            update.EventType,
+            Guid.Empty,
+            update.DisplayName,
+            string.Empty,
+            update.PositionX,
+            update.PositionY,
+            update.OccurredAtUtc,
+            update.EntityKind,
+            update.EntityInstanceId);
+    }
+
+    private ClientMapDefinition? ResolveDestinationMap(ClientMapDefinition currentMap, string transitionName)
+    {
+        var normalizedTransition = NormalizeLabel(transitionName);
+        if (string.IsNullOrWhiteSpace(normalizedTransition))
+        {
+            return null;
+        }
+
+        return mapCatalog.GetAll()
+            .Where(map => map.MapId != currentMap.MapId)
+            .Select(map => new { Map = map, Score = ScoreTransitionTarget(map, normalizedTransition) })
+            .Where(x => x.Score > 0)
+            .OrderByDescending(x => x.Score)
+            .ThenBy(x => x.Map.SceneName.Length)
+            .Select(x => x.Map)
+            .FirstOrDefault();
+    }
+
+    private static int ScoreTransitionTarget(ClientMapDefinition map, string normalizedTransition)
+    {
+        var scene = NormalizeLabel(map.SceneName);
+        var baseScene = NormalizeLabel(RemoveSceneSuffix(map.SceneName));
+
+        if (scene == normalizedTransition) return 300;
+        if (baseScene == normalizedTransition) return 250;
+        if (scene.Contains(normalizedTransition, StringComparison.OrdinalIgnoreCase)) return 120;
+        if (baseScene.Contains(normalizedTransition, StringComparison.OrdinalIgnoreCase)) return 100;
+        if (normalizedTransition.Contains(baseScene, StringComparison.OrdinalIgnoreCase)) return 90;
+        return 0;
+    }
+
+    private static string RemoveSceneSuffix(string sceneName)
+    {
+        return sceneName
+            .Replace("_All", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("_Newbie", string.Empty, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string NormalizeLabel(string value)
+    {
+        return new string(value
+            .Where(char.IsLetterOrDigit)
+            .Select(char.ToLowerInvariant)
+            .ToArray());
+    }
+
+    private static bool IsWithinVisibilityRange(ActivePlayerState observer, float targetX, float targetY)
+    {
+        var deltaX = targetX - observer.PositionX;
+        var deltaY = targetY - observer.PositionY;
+        var distanceSquared = (deltaX * deltaX) + (deltaY * deltaY);
+        var radiusSquared = VisibilityRadius * VisibilityRadius;
+        return distanceSquared <= radiusSquared;
+    }
+}

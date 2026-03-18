@@ -1,0 +1,58 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "LoginService",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-server-sln",
+      "program": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "${workspaceFolder}/server/src/LoginService/LoginService.csproj"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "GatewayService",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-server-sln",
+      "program": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "${workspaceFolder}/server/src/GatewayService/GatewayService.csproj"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "GameServer",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-server-sln",
+      "program": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "${workspaceFolder}/server/src/GameServer/GameServer.csproj"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Backend Trio",
+      "configurations": [
+        "LoginService",
+        "GatewayService",
+        "GameServer"
+      ],
+      "stopAll": true
+    }
+  ]
+}
