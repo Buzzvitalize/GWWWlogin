@@ -58,6 +58,9 @@ Separa siempre:
 
 ## 5. Qué estudiar primero
 
+Antes de crear entidades reales del mapa, revisa también `docs/client-reference.md` para apoyarte en la información del cliente ya subida al repo.
+
+
 Lee estos archivos en este orden:
 
 1. `server/src/LoginService/Program.cs`

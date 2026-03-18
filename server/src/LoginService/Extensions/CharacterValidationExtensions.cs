@@ -5,8 +5,9 @@ public static class CharacterValidationExtensions
     private static readonly HashSet<string> AllowedClasses =
     [
         "Warrior",
-        "Mage",
-        "Champion"
+        "Champion",
+        "Priest",
+        "Mage"
     ];
 
     private static readonly HashSet<string> AllowedGenders =

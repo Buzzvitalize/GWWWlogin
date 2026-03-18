@@ -66,4 +66,5 @@ Cuando cambiemos de nivel lo vamos a dejar anotado aquí con esta frase:
 - ampliar handshake del cliente;
 - crear estado real del mapa con entidades;
 - agregar broadcast entre jugadores;
+- usar `Localization/en_us` y `Map/` como referencia del cliente;
 - maps reales.

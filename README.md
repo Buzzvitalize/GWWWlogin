@@ -40,6 +40,10 @@ Construir un backend propio, mantenible y documentado, sin copiar archivos propi
 
 Consulta `docs/progress-roadmap.md` para ver en qué nivel vamos, qué terminamos y qué sigue después.
 
+## Referencia del cliente local
+
+Consulta `docs/client-reference.md` para aprovechar la información ya subida en `Gw Client/Localization/en_us` y `Gw Client/Map`.
+
 ## Primer paso de estudio
 
 Lee `docs/getting-started.md` y luego revisa `server/src/LoginService/Program.cs`.
