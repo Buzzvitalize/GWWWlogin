@@ -26,7 +26,8 @@ Responsable de:
 - alojar simulación activa por mapa y zona;
 - avanzar ticks de mundo;
 - mantener runtime del mundo separado del gateway;
-- preparar integración futura con entidades vivas, IA y mapas reales.
+- preparar integración futura con entidades vivas, IA y mapas reales;
+- exponer snapshots/eventos internos para que el gateway deje de alojar la simulación.
 
 ## Carpetas
 

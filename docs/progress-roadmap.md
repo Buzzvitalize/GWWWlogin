@@ -90,10 +90,11 @@ Cuando cambiemos de nivel lo vamos a dejar anotado aquí con esta frase:
 - `GET /health` para runtime del mundo;
 - servicio base `GameWorldService`;
 - loop inicial `ZoneSimulationHostedService`;
+- snapshots internos `/world/maps`, `/world/monsters`, `/world/events`;
 - primer corte documental entre gateway y runtime de mundo.
 
 ### Qué sigue después
-- mover más simulación viva desde `GatewayService` hacia `GameServer`;
-- definir contrato interno gateway <-> game server;
+- conectar `GatewayService` al bridge interno de `GameServer`;
+- seguir moviendo simulación viva fuera del gateway;
 - preparar guía reproducible para VS Code/GitHub y ejecución local;
 - maps reales.

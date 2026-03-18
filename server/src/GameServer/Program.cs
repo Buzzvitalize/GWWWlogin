@@ -27,4 +27,8 @@ app.MapGet("/health", (IConfiguration configuration, IGameWorldService gameWorld
     });
 });
 
+app.MapGet("/world/maps", (IGameWorldService gameWorldService) => Results.Ok(gameWorldService.GetMaps()));
+app.MapGet("/world/monsters", (IGameWorldService gameWorldService, int? mapId) => Results.Ok(gameWorldService.GetMonsters(mapId)));
+app.MapGet("/world/events", (IGameWorldService gameWorldService, long afterSequenceId = 0, int take = 50) => Results.Ok(gameWorldService.GetRecentUpdates(afterSequenceId, take)));
+
 app.Run();
