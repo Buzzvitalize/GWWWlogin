@@ -34,5 +34,9 @@ public interface IMapStateService
 
     IReadOnlyList<MonsterSpawnState> GetMonstersInRange(int mapId, float originX, float originY, float radius);
 
+    MonsterSpawnState? UpdateMonsterPosition(string instanceId, float positionX, float positionY);
+
+    NpcSpawnState? UpdateNpcPosition(string instanceId, float positionX, float positionY);
+
     int GetPopulation(int mapId);
 }

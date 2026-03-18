@@ -309,8 +309,8 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
         var monsters = mapStateService.GetMonstersInRange(state.MapId, state.PositionX, state.PositionY, VisibilityRadius);
 
         var playerText = string.Join(";", players.Select(x => $"P,{x.CharacterName},{x.PositionX},{x.PositionY}"));
-        var npcText = string.Join(";", npcs.Select(x => $"N,{x.DisplayName},{x.PositionX},{x.PositionY}"));
-        var monsterText = string.Join(";", monsters.Select(x => $"M,{x.DisplayName},{x.PositionX},{x.PositionY}"));
+        var npcText = string.Join(";", npcs.Select(x => $"N,{x.InstanceId},{x.DisplayName},{x.ZoneKey},{x.PositionX},{x.PositionY}"));
+        var monsterText = string.Join(";", monsters.Select(x => $"M,{x.InstanceId},{x.DisplayName},{x.ZoneKey},{x.PositionX},{x.PositionY},{(x.IsAlive ? "alive" : "down")}"));
 
         var payload = string.Join("|", new[] { playerText, npcText, monsterText }.Where(x => !string.IsNullOrWhiteSpace(x)));
         return new GatewayCommandResult(true, $"AROUND {payload}");

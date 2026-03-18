@@ -40,8 +40,9 @@ Construir un backend propio, mantenible y documentado, sin copiar archivos propi
 16. iniciar Athens en `Athens_Newbie` y Sparta en `Sparta_Newbie`.
 17. usar `POLL <token>` como broadcast incremental entre jugadores del mismo mapa.
 18. usar `AROUND <token>` y `POLL <token>` con visibilidad local por rango.
+19. exponer NPCs y monstruos como snapshot vivo por mapa con `instanceId` y `zoneKey`.
 
-Siguiente foco recomendado: estado vivo de entidades por mapa para cerrar esta fase del gateway.
+Siguiente foco recomendado: actualización dinámica de entidades por zona para cerrar esta fase del gateway.
 
 ## Seguimiento del progreso
 

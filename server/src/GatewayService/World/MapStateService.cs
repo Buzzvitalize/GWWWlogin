@@ -6,7 +6,13 @@ namespace GWWWlogin.GatewayService.World;
 
 public sealed class MapStateService(IMapDefinitionService mapDefinitionService) : IMapStateService
 {
+    private const int ZoneSize = 200;
+
     private readonly ConcurrentDictionary<Guid, ActivePlayerState> _playersBySession = new();
+    private readonly ConcurrentDictionary<int, IReadOnlyList<LiveNpcState>> _npcsByMap = new();
+    private readonly ConcurrentDictionary<int, IReadOnlyList<LiveMonsterState>> _monstersByMap = new();
+    private readonly ConcurrentDictionary<string, LiveNpcState> _npcsByInstanceId = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, LiveMonsterState> _monstersByInstanceId = new(StringComparer.OrdinalIgnoreCase);
 
     public ActivePlayerState EnterMap(
         Guid sessionId,
@@ -20,6 +26,8 @@ public sealed class MapStateService(IMapDefinitionService mapDefinitionService) 
         float positionY,
         int level)
     {
+        EnsureMapEntitiesLoaded(mapId);
+
         var state = new ActivePlayerState
         {
             SessionId = sessionId,
@@ -83,37 +91,149 @@ public sealed class MapStateService(IMapDefinitionService mapDefinitionService) 
 
     public IReadOnlyList<NpcSpawnState> GetNpcs(int mapId)
     {
-        var definition = mapDefinitionService.GetById(mapId);
-        return definition is null
-            ? []
-            : definition.Npcs.Select(x => new NpcSpawnState(x.NpcKey, x.DisplayName, definition.SceneName, mapId, x.PositionX, x.PositionY)).ToList();
+        EnsureMapEntitiesLoaded(mapId);
+        return _npcsByMap.TryGetValue(mapId, out var npcs)
+            ? npcs.Select(ToNpcSnapshot).ToList()
+            : [];
     }
 
     public IReadOnlyList<NpcSpawnState> GetNpcsInRange(int mapId, float originX, float originY, float radius)
     {
-        return GetNpcs(mapId)
-            .Where(x => IsWithinRange(originX, originY, x.PositionX, x.PositionY, radius))
-            .ToList();
+        EnsureMapEntitiesLoaded(mapId);
+        return _npcsByMap.TryGetValue(mapId, out var npcs)
+            ? npcs
+                .Where(x => IsWithinRange(originX, originY, x.PositionX, x.PositionY, radius))
+                .Select(ToNpcSnapshot)
+                .ToList()
+            : [];
     }
 
     public IReadOnlyList<MonsterSpawnState> GetMonsters(int mapId)
     {
-        var definition = mapDefinitionService.GetById(mapId);
-        return definition is null
-            ? []
-            : definition.Monsters.Select(x => new MonsterSpawnState(x.MonsterKey, x.DisplayName, definition.SceneName, mapId, x.PositionX, x.PositionY)).ToList();
+        EnsureMapEntitiesLoaded(mapId);
+        return _monstersByMap.TryGetValue(mapId, out var monsters)
+            ? monsters.Select(ToMonsterSnapshot).ToList()
+            : [];
     }
 
     public IReadOnlyList<MonsterSpawnState> GetMonstersInRange(int mapId, float originX, float originY, float radius)
     {
-        return GetMonsters(mapId)
-            .Where(x => IsWithinRange(originX, originY, x.PositionX, x.PositionY, radius))
-            .ToList();
+        EnsureMapEntitiesLoaded(mapId);
+        return _monstersByMap.TryGetValue(mapId, out var monsters)
+            ? monsters
+                .Where(x => IsAliveAndWithinRange(x, originX, originY, radius))
+                .Select(ToMonsterSnapshot)
+                .ToList()
+            : [];
+    }
+
+    public MonsterSpawnState? UpdateMonsterPosition(string instanceId, float positionX, float positionY)
+    {
+        if (!_monstersByInstanceId.TryGetValue(instanceId, out var monster))
+        {
+            return null;
+        }
+
+        monster.PositionX = positionX;
+        monster.PositionY = positionY;
+        monster.ZoneKey = BuildZoneKey(positionX, positionY);
+        monster.LastUpdatedAtUtc = DateTime.UtcNow;
+        return ToMonsterSnapshot(monster);
+    }
+
+    public NpcSpawnState? UpdateNpcPosition(string instanceId, float positionX, float positionY)
+    {
+        if (!_npcsByInstanceId.TryGetValue(instanceId, out var npc))
+        {
+            return null;
+        }
+
+        npc.PositionX = positionX;
+        npc.PositionY = positionY;
+        npc.ZoneKey = BuildZoneKey(positionX, positionY);
+        npc.LastUpdatedAtUtc = DateTime.UtcNow;
+        return ToNpcSnapshot(npc);
     }
 
     public int GetPopulation(int mapId)
     {
         return _playersBySession.Values.Count(x => x.MapId == mapId);
+    }
+
+    private void EnsureMapEntitiesLoaded(int mapId)
+    {
+        _npcsByMap.GetOrAdd(mapId, _ => BuildLiveNpcs(mapId));
+        _monstersByMap.GetOrAdd(mapId, _ => BuildLiveMonsters(mapId));
+    }
+
+    private IReadOnlyList<LiveNpcState> BuildLiveNpcs(int mapId)
+    {
+        var definition = mapDefinitionService.GetById(mapId);
+        if (definition is null)
+        {
+            return [];
+        }
+
+        var loadedAtUtc = DateTime.UtcNow;
+        var npcs = definition.Npcs
+            .Select((spawn, index) => new LiveNpcState
+            {
+                InstanceId = $"npc:{mapId}:{spawn.NpcKey}:{index}",
+                NpcKey = spawn.NpcKey,
+                DisplayName = spawn.DisplayName,
+                SceneName = definition.SceneName,
+                MapId = mapId,
+                PositionX = spawn.PositionX,
+                PositionY = spawn.PositionY,
+                ZoneKey = BuildZoneKey(spawn.PositionX, spawn.PositionY),
+                LastUpdatedAtUtc = loadedAtUtc
+            })
+            .ToList();
+
+        foreach (var npc in npcs)
+        {
+            _npcsByInstanceId[npc.InstanceId] = npc;
+        }
+
+        return npcs;
+    }
+
+    private IReadOnlyList<LiveMonsterState> BuildLiveMonsters(int mapId)
+    {
+        var definition = mapDefinitionService.GetById(mapId);
+        if (definition is null)
+        {
+            return [];
+        }
+
+        var loadedAtUtc = DateTime.UtcNow;
+        var monsters = definition.Monsters
+            .Select((spawn, index) => new LiveMonsterState
+            {
+                InstanceId = $"monster:{mapId}:{spawn.MonsterKey}:{index}",
+                MonsterKey = spawn.MonsterKey,
+                DisplayName = spawn.DisplayName,
+                SceneName = definition.SceneName,
+                MapId = mapId,
+                PositionX = spawn.PositionX,
+                PositionY = spawn.PositionY,
+                ZoneKey = BuildZoneKey(spawn.PositionX, spawn.PositionY),
+                IsAlive = true,
+                LastUpdatedAtUtc = loadedAtUtc
+            })
+            .ToList();
+
+        foreach (var monster in monsters)
+        {
+            _monstersByInstanceId[monster.InstanceId] = monster;
+        }
+
+        return monsters;
+    }
+
+    private static bool IsAliveAndWithinRange(LiveMonsterState monster, float originX, float originY, float radius)
+    {
+        return monster.IsAlive && IsWithinRange(originX, originY, monster.PositionX, monster.PositionY, radius);
     }
 
     private static PlayerPresence ToPlayerPresence(ActivePlayerState state)
@@ -130,6 +250,35 @@ public sealed class MapStateService(IMapDefinitionService mapDefinitionService) 
             state.Level);
     }
 
+    private static NpcSpawnState ToNpcSnapshot(LiveNpcState npc)
+    {
+        return new NpcSpawnState(
+            npc.InstanceId,
+            npc.NpcKey,
+            npc.DisplayName,
+            npc.SceneName,
+            npc.MapId,
+            npc.PositionX,
+            npc.PositionY,
+            npc.ZoneKey,
+            npc.LastUpdatedAtUtc);
+    }
+
+    private static MonsterSpawnState ToMonsterSnapshot(LiveMonsterState monster)
+    {
+        return new MonsterSpawnState(
+            monster.InstanceId,
+            monster.MonsterKey,
+            monster.DisplayName,
+            monster.SceneName,
+            monster.MapId,
+            monster.PositionX,
+            monster.PositionY,
+            monster.ZoneKey,
+            monster.IsAlive,
+            monster.LastUpdatedAtUtc);
+    }
+
     private static bool IsWithinRange(float originX, float originY, float targetX, float targetY, float radius)
     {
         var deltaX = targetX - originX;
@@ -137,5 +286,12 @@ public sealed class MapStateService(IMapDefinitionService mapDefinitionService) 
         var distanceSquared = (deltaX * deltaX) + (deltaY * deltaY);
         var radiusSquared = radius * radius;
         return distanceSquared <= radiusSquared;
+    }
+
+    private static string BuildZoneKey(float positionX, float positionY)
+    {
+        var zoneX = (int)MathF.Floor(positionX / ZoneSize);
+        var zoneY = (int)MathF.Floor(positionY / ZoneSize);
+        return $"zone:{zoneX}:{zoneY}";
     }
 }
