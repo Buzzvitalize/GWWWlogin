@@ -65,13 +65,13 @@ Cuando cambiemos de nivel lo vamos a dejar anotado aquí con esta frase:
 - definiciones iniciales de mapa/NPC/monstruo;
 - broadcast base de entrada, salida y movimiento;
 - snapshot inicial de entidades de mapa (`AROUND`).
+- visibilidad local por rango para `AROUND` y `POLL`.
 
 ### Qué sigue después
 - crear estado real del mapa con entidades vivas y actualización por zona;
-- sincronizar `AROUND` y `POLL` con rangos/visibilidad reales;
 - usar `Localization/en_us` y `Map/` como referencia del cliente;
 - ampliar handshake del cliente con más datos de escena;
 - maps reales.
 
 ### Siguiente paso recomendado en esta fase
-- mantener el Nivel 3 y continuar con visibilidad/rangos por mapa antes de pasar al siguiente bloque.
+- mantener el Nivel 3 y continuar con estado vivo de entidades por mapa antes de pasar al siguiente bloque.

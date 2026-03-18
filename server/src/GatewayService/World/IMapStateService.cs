@@ -24,9 +24,15 @@ public interface IMapStateService
 
     IReadOnlyList<PlayerPresence> GetPlayers(int mapId);
 
+    IReadOnlyList<PlayerPresence> GetPlayersInRange(int mapId, float originX, float originY, float radius);
+
     IReadOnlyList<NpcSpawnState> GetNpcs(int mapId);
 
+    IReadOnlyList<NpcSpawnState> GetNpcsInRange(int mapId, float originX, float originY, float radius);
+
     IReadOnlyList<MonsterSpawnState> GetMonsters(int mapId);
+
+    IReadOnlyList<MonsterSpawnState> GetMonstersInRange(int mapId, float originX, float originY, float radius);
 
     int GetPopulation(int mapId);
 }

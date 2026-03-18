@@ -39,8 +39,9 @@ Construir un backend propio, mantenible y documentado, sin copiar archivos propi
 15. usar `AROUND <token>` para snapshot de entidades del mapa;
 16. iniciar Athens en `Athens_Newbie` y Sparta en `Sparta_Newbie`.
 17. usar `POLL <token>` como broadcast incremental entre jugadores del mismo mapa.
+18. usar `AROUND <token>` y `POLL <token>` con visibilidad local por rango.
 
-Siguiente foco recomendado: visibilidad/rangos reales del mapa para cerrar esta fase del gateway.
+Siguiente foco recomendado: estado vivo de entidades por mapa para cerrar esta fase del gateway.
 
 ## Seguimiento del progreso
 

@@ -10,6 +10,8 @@ namespace GWWWlogin.GatewayService.Services;
 
 public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateService mapStateService, IMapDefinitionService mapDefinitionService, IMapBroadcastService mapBroadcastService) : IGatewaySessionService
 {
+    private const float VisibilityRadius = 180f;
+
     public async Task<GatewayCommandResult> HandleCommandAsync(string commandLine, CancellationToken cancellationToken)
     {
         var parts = commandLine.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -277,6 +279,7 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
 
         var visibleEvents = events
             .Where(x => x.SessionId != state.SessionId)
+            .Where(x => IsWithinVisibilityRange(state, x.PositionX, x.PositionY))
             .ToList();
 
         var payload = string.Join("|", visibleEvents.Select(x => $"{x.SequenceId},{x.EventType},{x.CharacterName},{x.PositionX},{x.PositionY}"));
@@ -299,9 +302,11 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
             return new GatewayCommandResult(false, "ERROR player_not_in_map");
         }
 
-        var players = mapStateService.GetPlayers(state.MapId);
-        var npcs = mapStateService.GetNpcs(state.MapId);
-        var monsters = mapStateService.GetMonsters(state.MapId);
+        var players = mapStateService.GetPlayersInRange(state.MapId, state.PositionX, state.PositionY, VisibilityRadius)
+            .Where(x => x.SessionId != state.SessionId)
+            .ToList();
+        var npcs = mapStateService.GetNpcsInRange(state.MapId, state.PositionX, state.PositionY, VisibilityRadius);
+        var monsters = mapStateService.GetMonstersInRange(state.MapId, state.PositionX, state.PositionY, VisibilityRadius);
 
         var playerText = string.Join(";", players.Select(x => $"P,{x.CharacterName},{x.PositionX},{x.PositionY}"));
         var npcText = string.Join(";", npcs.Select(x => $"N,{x.DisplayName},{x.PositionX},{x.PositionY}"));
@@ -309,5 +314,13 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
 
         var payload = string.Join("|", new[] { playerText, npcText, monsterText }.Where(x => !string.IsNullOrWhiteSpace(x)));
         return new GatewayCommandResult(true, $"AROUND {payload}");
+    }
+    private static bool IsWithinVisibilityRange(ActivePlayerState observer, float targetX, float targetY)
+    {
+        var deltaX = targetX - observer.PositionX;
+        var deltaY = targetY - observer.PositionY;
+        var distanceSquared = (deltaX * deltaX) + (deltaY * deltaY);
+        var radiusSquared = VisibilityRadius * VisibilityRadius;
+        return distanceSquared <= radiusSquared;
     }
 }

@@ -69,16 +69,15 @@ public sealed class MapStateService(IMapDefinitionService mapDefinitionService) 
     {
         return _playersBySession.Values
             .Where(x => x.MapId == mapId)
-            .Select(x => new PlayerPresence(
-                x.SessionId,
-                x.CharacterId,
-                x.CharacterName,
-                x.Faction,
-                x.SceneName,
-                x.MapId,
-                x.PositionX,
-                x.PositionY,
-                x.Level))
+            .Select(ToPlayerPresence)
+            .ToList();
+    }
+
+    public IReadOnlyList<PlayerPresence> GetPlayersInRange(int mapId, float originX, float originY, float radius)
+    {
+        return _playersBySession.Values
+            .Where(x => x.MapId == mapId && IsWithinRange(originX, originY, x.PositionX, x.PositionY, radius))
+            .Select(ToPlayerPresence)
             .ToList();
     }
 
@@ -90,6 +89,13 @@ public sealed class MapStateService(IMapDefinitionService mapDefinitionService) 
             : definition.Npcs.Select(x => new NpcSpawnState(x.NpcKey, x.DisplayName, definition.SceneName, mapId, x.PositionX, x.PositionY)).ToList();
     }
 
+    public IReadOnlyList<NpcSpawnState> GetNpcsInRange(int mapId, float originX, float originY, float radius)
+    {
+        return GetNpcs(mapId)
+            .Where(x => IsWithinRange(originX, originY, x.PositionX, x.PositionY, radius))
+            .ToList();
+    }
+
     public IReadOnlyList<MonsterSpawnState> GetMonsters(int mapId)
     {
         var definition = mapDefinitionService.GetById(mapId);
@@ -98,8 +104,38 @@ public sealed class MapStateService(IMapDefinitionService mapDefinitionService) 
             : definition.Monsters.Select(x => new MonsterSpawnState(x.MonsterKey, x.DisplayName, definition.SceneName, mapId, x.PositionX, x.PositionY)).ToList();
     }
 
+    public IReadOnlyList<MonsterSpawnState> GetMonstersInRange(int mapId, float originX, float originY, float radius)
+    {
+        return GetMonsters(mapId)
+            .Where(x => IsWithinRange(originX, originY, x.PositionX, x.PositionY, radius))
+            .ToList();
+    }
+
     public int GetPopulation(int mapId)
     {
         return _playersBySession.Values.Count(x => x.MapId == mapId);
+    }
+
+    private static PlayerPresence ToPlayerPresence(ActivePlayerState state)
+    {
+        return new PlayerPresence(
+            state.SessionId,
+            state.CharacterId,
+            state.CharacterName,
+            state.Faction,
+            state.SceneName,
+            state.MapId,
+            state.PositionX,
+            state.PositionY,
+            state.Level);
+    }
+
+    private static bool IsWithinRange(float originX, float originY, float targetX, float targetY, float radius)
+    {
+        var deltaX = targetX - originX;
+        var deltaY = targetY - originY;
+        var distanceSquared = (deltaX * deltaX) + (deltaY * deltaY);
+        var radiusSquared = radius * radius;
+        return distanceSquared <= radiusSquared;
     }
 }
