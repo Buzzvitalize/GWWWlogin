@@ -113,7 +113,9 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
             state.SceneName,
             state.PositionX,
             state.PositionY,
-            DateTime.UtcNow));
+            DateTime.UtcNow,
+            "player",
+            state.CharacterId.ToString()));
 
         state.LastSeenBroadcastSequence = enterEvent.SequenceId;
 
@@ -214,7 +216,9 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
             state.SceneName,
             state.PositionX,
             state.PositionY,
-            DateTime.UtcNow));
+            DateTime.UtcNow,
+            "player",
+            state.CharacterId.ToString()));
 
         state.LastSeenBroadcastSequence = moveEvent.SequenceId;
 
@@ -247,7 +251,9 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
             state.SceneName,
             state.PositionX,
             state.PositionY,
-            DateTime.UtcNow));
+            DateTime.UtcNow,
+            "player",
+            state.CharacterId.ToString()));
 
         session.LastSeenAtUtc = DateTime.UtcNow;
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -282,7 +288,7 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
             .Where(x => IsWithinVisibilityRange(state, x.PositionX, x.PositionY))
             .ToList();
 
-        var payload = string.Join("|", visibleEvents.Select(x => $"{x.SequenceId},{x.EventType},{x.CharacterName},{x.PositionX},{x.PositionY}"));
+        var payload = string.Join("|", visibleEvents.Select(x => $"{x.SequenceId},{x.EventType},{x.EntityKind},{x.EntityInstanceId},{x.CharacterName},{x.PositionX},{x.PositionY}"));
         return new GatewayCommandResult(true, $"EVENTS {payload}");
     }
 

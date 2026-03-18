@@ -41,8 +41,9 @@ Construir un backend propio, mantenible y documentado, sin copiar archivos propi
 17. usar `POLL <token>` como broadcast incremental entre jugadores del mismo mapa.
 18. usar `AROUND <token>` y `POLL <token>` con visibilidad local por rango.
 19. exponer NPCs y monstruos como snapshot vivo por mapa con `instanceId` y `zoneKey`.
+20. emitir actualización dinámica básica de monstruos por zona y reflejarla en `POLL <token>`.
 
-Siguiente foco recomendado: actualización dinámica de entidades por zona para cerrar esta fase del gateway.
+Siguiente foco recomendado: handshake más completo + separar responsabilidades de GameServer cuando el mundo activo crezca.
 
 ## Seguimiento del progreso
 

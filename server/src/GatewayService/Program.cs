@@ -17,6 +17,7 @@ builder.Services.AddSingleton<IMapStateService, MapStateService>();
 builder.Services.AddSingleton<IMapBroadcastService, MapBroadcastService>();
 builder.Services.AddScoped<IGatewaySessionService, GatewaySessionService>();
 builder.Services.AddHostedService<TcpGatewayHostedService>();
+builder.Services.AddHostedService<WorldSimulationHostedService>();
 
 var app = builder.Build();
 

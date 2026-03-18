@@ -8,4 +8,6 @@ public sealed record MapBroadcastEvent(
     string SceneName,
     float PositionX,
     float PositionY,
-    DateTime OccurredAtUtc);
+    DateTime OccurredAtUtc,
+    string EntityKind = "player",
+    string EntityInstanceId = "");

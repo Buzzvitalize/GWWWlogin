@@ -67,12 +67,13 @@ Cuando cambiemos de nivel lo vamos a dejar anotado aquí con esta frase:
 - snapshot inicial de entidades de mapa (`AROUND`).
 - visibilidad local por rango para `AROUND` y `POLL`.
 - snapshot vivo por mapa para NPCs/monstruos con `instanceId` y `zoneKey`.
+- actualización dinámica básica de monstruos por zona vía broadcast.
 
 ### Qué sigue después
-- ampliar actualización por zona para movimiento/IA de entidades vivas;
-- usar `Localization/en_us` y `Map/` como referencia del cliente;
 - ampliar handshake del cliente con más datos de escena;
+- usar `Localization/en_us` y `Map/` como referencia del cliente;
+- consolidar separación hacia un `GameServer` cuando el mundo activo y la simulación crezcan;
 - maps reales.
 
 ### Siguiente paso recomendado en esta fase
-- mantener el Nivel 3 y continuar con actualización dinámica de entidades por zona antes de pasar al siguiente bloque.
+- podemos seguir un poco más en Nivel 3 para enriquecer handshake/contratos; después de eso ya es razonable separar un `GameServer` dedicado.
