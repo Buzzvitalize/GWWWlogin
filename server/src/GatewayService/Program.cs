@@ -1,3 +1,4 @@
+using GWWWlogin.GatewayService.Broadcast;
 using GWWWlogin.GatewayService.Data;
 using GWWWlogin.GatewayService.Definitions;
 using GWWWlogin.GatewayService.HostedServices;
@@ -13,6 +14,7 @@ builder.Services.AddDbContext<GatewayDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("AuthDb")));
 builder.Services.AddSingleton<IMapDefinitionService, MapDefinitionService>();
 builder.Services.AddSingleton<IMapStateService, MapStateService>();
+builder.Services.AddSingleton<IMapBroadcastService, MapBroadcastService>();
 builder.Services.AddScoped<IGatewaySessionService, GatewaySessionService>();
 builder.Services.AddHostedService<TcpGatewayHostedService>();
 
@@ -32,7 +34,7 @@ app.MapGet("/health", async (IConfiguration configuration, GatewayDbContext dbCo
         publicHost = options.PublicHost,
         sessions = sessionCount,
         maps = mapDefinitionService.GetAll().Count,
-        supportedCommands = new[] { "HELLO", "ENTER_MAP", "PING", "WHOAMI", "MOVE" },
+        supportedCommands = new[] { "HELLO", "ENTER_MAP", "PING", "WHOAMI", "MOVE", "LEAVE", "POLL" },
         utc = DateTime.UtcNow
     });
 });

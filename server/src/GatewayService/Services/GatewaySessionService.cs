@@ -1,12 +1,14 @@
+using GWWWlogin.GatewayService.Broadcast;
 using GWWWlogin.GatewayService.Data;
 using GWWWlogin.GatewayService.Definitions;
+using GWWWlogin.GatewayService.Models;
 using GWWWlogin.GatewayService.Protocols;
 using GWWWlogin.GatewayService.World;
 using Microsoft.EntityFrameworkCore;
 
 namespace GWWWlogin.GatewayService.Services;
 
-public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateService mapStateService, IMapDefinitionService mapDefinitionService) : IGatewaySessionService
+public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateService mapStateService, IMapDefinitionService mapDefinitionService, IMapBroadcastService mapBroadcastService) : IGatewaySessionService
 {
     public async Task<GatewayCommandResult> HandleCommandAsync(string commandLine, CancellationToken cancellationToken)
     {
@@ -26,6 +28,8 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
             "PING" when parts.Length == 2 => await HandlePingAsync(token, cancellationToken),
             "WHOAMI" when parts.Length == 2 => await HandleWhoAmIAsync(token, cancellationToken),
             "MOVE" when parts.Length == 4 && float.TryParse(parts[2], out var x) && float.TryParse(parts[3], out var y) => await HandleMoveAsync(token, x, y, cancellationToken),
+            "LEAVE" when parts.Length == 2 => await HandleLeaveAsync(token, cancellationToken),
+            "POLL" when parts.Length == 2 => await HandlePollAsync(token, cancellationToken),
             _ => new GatewayCommandResult(false, "ERROR unknown_command")
         };
     }
@@ -97,6 +101,15 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
             character.Level);
 
         var population = mapStateService.GetPopulation(state.MapId);
+
+        mapBroadcastService.Publish(state.MapId, new MapBroadcastEvent(
+            "ENTER",
+            state.SessionId,
+            state.CharacterName,
+            state.SceneName,
+            state.PositionX,
+            state.PositionY,
+            DateTime.UtcNow));
 
         var mapDefinition = mapDefinitionService.GetById(state.MapId);
         var npcCount = mapDefinition?.Npcs.Count ?? 0;
@@ -187,8 +200,69 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
         session.LastSeenAtUtc = DateTime.UtcNow;
         await dbContext.SaveChangesAsync(cancellationToken);
 
+        mapBroadcastService.Publish(state.MapId, new MapBroadcastEvent(
+            "MOVE",
+            state.SessionId,
+            state.CharacterName,
+            state.SceneName,
+            state.PositionX,
+            state.PositionY,
+            DateTime.UtcNow));
+
         return new GatewayCommandResult(
             true,
             $"MOVE_OK {state.MapId} {state.PositionX} {state.PositionY}");
+    }
+
+    private async Task<GatewayCommandResult> HandleLeaveAsync(string token, CancellationToken cancellationToken)
+    {
+        var session = await dbContext.Sessions
+            .SingleOrDefaultAsync(x => x.Token == token, cancellationToken);
+
+        if (session is null)
+        {
+            return new GatewayCommandResult(false, "ERROR session_not_found");
+        }
+
+        var state = mapStateService.Leave(session.Id);
+        if (state is null)
+        {
+            return new GatewayCommandResult(false, "ERROR player_not_in_map");
+        }
+
+        mapBroadcastService.Publish(state.MapId, new MapBroadcastEvent(
+            "LEAVE",
+            state.SessionId,
+            state.CharacterName,
+            state.SceneName,
+            state.PositionX,
+            state.PositionY,
+            DateTime.UtcNow));
+
+        session.LastSeenAtUtc = DateTime.UtcNow;
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return new GatewayCommandResult(true, $"LEAVE_OK {state.SceneName} {state.MapId}");
+    }
+
+    private async Task<GatewayCommandResult> HandlePollAsync(string token, CancellationToken cancellationToken)
+    {
+        var session = await dbContext.Sessions
+            .SingleOrDefaultAsync(x => x.Token == token, cancellationToken);
+
+        if (session is null)
+        {
+            return new GatewayCommandResult(false, "ERROR session_not_found");
+        }
+
+        var state = mapStateService.GetBySession(session.Id);
+        if (state is null)
+        {
+            return new GatewayCommandResult(false, "ERROR player_not_in_map");
+        }
+
+        var events = mapBroadcastService.Read(state.MapId, 5);
+        var payload = string.Join("|", events.Select(x => $"{x.EventType},{x.CharacterName},{x.PositionX},{x.PositionY}"));
+        return new GatewayCommandResult(true, $"EVENTS {payload}");
     }
 }

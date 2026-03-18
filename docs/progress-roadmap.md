@@ -62,11 +62,12 @@ Cuando cambiemos de nivel lo vamos a dejar anotado aquí con esta frase:
 - comando `MOVE <token> <x> <y>`;
 - estado de mapa en memoria;
 - inicio por facción hacia `Athens_Newbie` y `Sparta_Newbie`;
-- definiciones iniciales de mapa/NPC/monstruo.
+- definiciones iniciales de mapa/NPC/monstruo;
+- broadcast base de entrada, salida y movimiento.
 
 ### Qué sigue después
 - ampliar handshake del cliente;
 - crear estado real del mapa con entidades;
-- agregar broadcast entre jugadores;
+- ampliar broadcast entre jugadores;
 - usar `Localization/en_us` y `Map/` como referencia del cliente;
 - maps reales.

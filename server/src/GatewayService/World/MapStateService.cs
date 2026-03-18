@@ -57,6 +57,13 @@ public sealed class MapStateService : IMapStateService
         return state;
     }
 
+    public ActivePlayerState? Leave(Guid sessionId)
+    {
+        return _playersBySession.TryRemove(sessionId, out var state)
+            ? state
+            : null;
+    }
+
     public int GetPopulation(int mapId)
     {
         return _playersBySession.Values.Count(x => x.MapId == mapId);

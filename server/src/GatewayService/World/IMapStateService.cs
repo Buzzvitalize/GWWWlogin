@@ -20,5 +20,7 @@ public interface IMapStateService
 
     ActivePlayerState? Move(Guid sessionId, float positionX, float positionY);
 
+    ActivePlayerState? Leave(Guid sessionId);
+
     int GetPopulation(int mapId);
 }
