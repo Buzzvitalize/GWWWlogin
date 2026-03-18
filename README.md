@@ -29,6 +29,11 @@ Construir un backend propio, mantenible y documentado, sin copiar archivos propi
 7. seleccionar personaje con `POST /api/sessions/select-character`;
 8. consultar sesión con `GET /api/sessions/{token}`.
 
+### Nivel 3 - Gateway y entrada al mapa
+9. preparar ticket de gateway con `POST /api/sessions/{token}/gateway-ticket`;
+10. levantar `GatewayService`;
+11. validar conexión TCP inicial al gateway.
+
 ## Seguimiento del progreso
 
 Consulta `docs/progress-roadmap.md` para ver en qué nivel vamos, qué terminamos y qué sigue después.

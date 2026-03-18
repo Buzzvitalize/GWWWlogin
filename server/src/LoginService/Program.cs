@@ -200,4 +200,39 @@ app.MapPost("/api/sessions/select-character", async (
     }
 });
 
+
+app.MapPost("/api/sessions/{token}/gateway-ticket", async (
+    string token,
+    ISessionService sessionService,
+    CancellationToken cancellationToken) =>
+{
+    if (string.IsNullOrWhiteSpace(token))
+    {
+        return Results.BadRequest(new
+        {
+            message = "Session token is required."
+        });
+    }
+
+    try
+    {
+        var response = await sessionService.PrepareGatewayAsync(token, cancellationToken);
+        return Results.Ok(response);
+    }
+    catch (KeyNotFoundException ex)
+    {
+        return Results.NotFound(new
+        {
+            message = ex.Message
+        });
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.Conflict(new
+        {
+            message = ex.Message
+        });
+    }
+});
+
 app.Run();

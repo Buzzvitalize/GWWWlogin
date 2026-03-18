@@ -1,4 +1,5 @@
 using GWWWlogin.LoginService.Data;
+using GWWWlogin.LoginService.Rules;
 using GWWWlogin.Shared;
 using Microsoft.EntityFrameworkCore;
 
@@ -47,6 +48,48 @@ public sealed class SessionService(AuthDbContext dbContext) : ISessionService
             character.Level,
             session.ExpiresAtUtc,
             true);
+    }
+
+
+
+    public async Task<GatewayTicketResponse> PrepareGatewayAsync(string token, CancellationToken cancellationToken)
+    {
+        var normalizedToken = token.Trim();
+
+        var session = await dbContext.Sessions
+            .Include(x => x.SelectedCharacter)
+            .SingleOrDefaultAsync(x => x.Token == normalizedToken, cancellationToken);
+
+        if (session is null)
+        {
+            throw new KeyNotFoundException("Session not found.");
+        }
+
+        if (session.ExpiresAtUtc <= DateTime.UtcNow)
+        {
+            throw new InvalidOperationException("Session expired.");
+        }
+
+        if (session.SelectedCharacter is null)
+        {
+            throw new InvalidOperationException("Select a character before requesting gateway entry.");
+        }
+
+        session.LastSeenAtUtc = DateTime.UtcNow;
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return new GatewayTicketResponse(
+            session.Id,
+            session.AccountId,
+            session.SelectedCharacter.Id,
+            session.SelectedCharacter.Name,
+            "127.1.1.110",
+            6001,
+            session.SelectedCharacter.MapId,
+            session.SelectedCharacter.PositionX,
+            session.SelectedCharacter.PositionY,
+            session.ExpiresAtUtc,
+            GameplayRules.MaxCharacterLevel);
     }
 
     public async Task<SessionSummaryResponse?> GetByTokenAsync(string token, CancellationToken cancellationToken)

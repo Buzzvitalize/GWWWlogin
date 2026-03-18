@@ -10,7 +10,14 @@ Responsable de:
 - listar personajes por cuenta;
 - emitir sesión inicial persistida;
 - seleccionar personaje antes del gateway;
-- devolver lista de servidores disponibles.
+- devolver lista de servidores disponibles;
+- emitir ticket para entrada al gateway.
+
+### GatewayService
+Responsable de:
+- aceptar conexiones TCP iniciales;
+- anunciar estado básico del gateway;
+- preparar futura entrada al mapa.
 
 ## Carpetas
 

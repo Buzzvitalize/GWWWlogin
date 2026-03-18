@@ -42,6 +42,7 @@ Usaremos **C# con .NET 8** como objetivo del proyecto porque ofrece:
 - gateway TCP;
 - handshake;
 - heartbeat;
+- ticket de entrada al mapa;
 - catálogo de paquetes.
 
 ## 4. Cómo pensar el sistema
@@ -66,7 +67,7 @@ Lee estos archivos en este orden:
 
 Cuando terminemos este nivel, seguimos con una de estas tareas:
 
-1. marcar este nivel como terminado;
+1. implementar handshake inicial del gateway;
 2. agregar migrations formales de EF Core;
-3. crear el gateway TCP del juego;
-4. empezar entrada al mapa y comandos base.
+3. empezar entrada al mapa;
+4. agregar comandos base del juego.

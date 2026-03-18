@@ -17,7 +17,7 @@
 ## Nivel 2 - Personajes básicos
 
 ### Estado
-- casi terminado.
+- terminado.
 
 ### Ya hicimos en este nivel
 - modelo `Character`;
@@ -29,7 +29,6 @@
 - selección de personaje por sesión.
 
 ### Qué sigue después
-- marcar este nivel como terminado;
 - primer gateway TCP;
 - entrada al mapa;
 - comandos base del juego.
@@ -45,3 +44,20 @@ Cuando cambiemos de nivel lo vamos a dejar anotado aquí con esta frase:
 - nivel máximo de referencia actual: `140`;
 - el personaje inicia en nivel `1`;
 - el siguiente bloque será gateway + entrada a mapa.
+
+## Nivel 3 - Gateway y entrada al mapa
+
+### Estado
+- en progreso.
+
+### Ya hicimos en este nivel
+- proyecto `GatewayService`;
+- health check HTTP para gateway;
+- listener TCP inicial;
+- ticket de gateway desde `LoginService`.
+
+### Qué sigue después
+- handshake inicial del cliente;
+- entrada al mapa;
+- comandos base del juego;
+- maps reales.
