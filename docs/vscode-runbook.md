@@ -73,6 +73,7 @@ El compound sirve para arrancar los tres procesos desde VS Code.
 
 ### GameServer
 - `GET /health`
+- `GET /maps`
 - `GET /world/maps`
 - `GET /world/monsters`
 - `GET /world/events`
@@ -87,7 +88,8 @@ El compound sirve para arrancar los tres procesos desde VS Code.
 6. crear personaje y seleccionarlo;
 7. pedir gateway ticket;
 8. conectar cliente TCP al gateway;
-9. probar `HELLO`, `ENTER_MAP`, `AROUND` y `POLL`.
+9. consultar `/maps` para confirmar el catálogo configurado;
+10. probar `HELLO`, `ENTER_MAP`, `AROUND` y `POLL`.
 
 ## 8. Configuración del cliente legado
 

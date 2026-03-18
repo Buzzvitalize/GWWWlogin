@@ -21,12 +21,14 @@ Confirma este orden:
 
 ### GameServer
 - `GET /health`
+- `GET /maps`
 - `GET /world/maps`
 - `GET /world/monsters?mapId=1001`
 - `GET /world/events`
 
 Qué observar:
 - que `SimulationTick` avance;
+- que `/maps` y `/world/maps` devuelvan el catálogo configurado de escenas;
 - que existan monstruos en `Athens_Newbie` o `Sparta_Newbie`;
 - que `/world/events` devuelva updates con `SequenceId`.
 
@@ -96,6 +98,7 @@ docker compose up -d
 ```bash
 curl -fsS http://127.0.0.1:5000/health
 curl -fsS http://127.0.0.1:5100/health
+curl -fsS http://127.0.0.1:5100/maps
 curl -fsS http://127.0.0.1:5100/world/maps
 curl -fsS "http://127.0.0.1:5100/world/monsters?mapId=1001"
 curl -fsS http://127.0.0.1:5100/world/events

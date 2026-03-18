@@ -9,4 +9,6 @@ public sealed class GameServerOptions
     public int Port { get; set; } = 5100;
 
     public int ZoneSize { get; set; } = 200;
+
+    public List<GameMapOptions> Maps { get; set; } = [];
 }

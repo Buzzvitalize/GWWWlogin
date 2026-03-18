@@ -12,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<GatewayOptions>(builder.Configuration.GetSection(GatewayOptions.SectionName));
 builder.Services.Configure<GameServerBridgeOptions>(builder.Configuration.GetSection(GameServerBridgeOptions.SectionName));
+builder.Services.Configure<MapCatalogOptions>(builder.Configuration.GetSection(MapCatalogOptions.SectionName));
 builder.Services.AddDbContext<GatewayDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("AuthDb")));
 builder.Services.AddSingleton<IMapDefinitionService, MapDefinitionService>();
