@@ -282,15 +282,31 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
             return new GatewayCommandResult(false, "ERROR player_not_in_map");
         }
 
-        var events = mapBroadcastService.ReadSince(state.MapId, state.LastSeenBroadcastSequence, 20);
-        if (events.Count > 0)
+        var playerEvents = mapBroadcastService.ReadSince(state.MapId, state.LastSeenBroadcastSequence, 20);
+        if (playerEvents.Count > 0)
         {
-            state.LastSeenBroadcastSequence = events[^1].SequenceId;
+            state.LastSeenBroadcastSequence = playerEvents[^1].SequenceId;
         }
 
-        var visibleEvents = events
+        var runtimeEvents = await gameServerBridgeClient.GetEventsAsync(state.LastSeenGameServerSequence, 20, cancellationToken);
+        if (runtimeEvents.Count > 0)
+        {
+            state.LastSeenGameServerSequence = runtimeEvents[^1].SequenceId;
+        }
+
+        var visiblePlayerEvents = playerEvents
             .Where(x => x.SessionId != state.SessionId)
+            .Where(x => IsWithinVisibilityRange(state, x.PositionX, x.PositionY));
+
+        var visibleRuntimeEvents = runtimeEvents
+            .Where(x => x.MapId == state.MapId)
             .Where(x => IsWithinVisibilityRange(state, x.PositionX, x.PositionY))
+            .Select(ToMapBroadcastEvent);
+
+        var visibleEvents = visiblePlayerEvents
+            .Concat(visibleRuntimeEvents)
+            .OrderBy(x => x.OccurredAtUtc)
+            .Take(20)
             .ToList();
 
         return new GatewayCommandResult(true, GatewayProtocolSerializer.FormatWorldEvents(visibleEvents));
@@ -348,6 +364,21 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
             monster.ZoneKey,
             monster.IsAlive,
             monster.LastUpdatedAtUtc);
+    }
+
+    private static MapBroadcastEvent ToMapBroadcastEvent(WorldBridgeEntityUpdate update)
+    {
+        return new MapBroadcastEvent(
+            update.SequenceId,
+            update.EventType,
+            Guid.Empty,
+            update.DisplayName,
+            string.Empty,
+            update.PositionX,
+            update.PositionY,
+            update.OccurredAtUtc,
+            update.EntityKind,
+            update.EntityInstanceId);
     }
 
     private static bool IsWithinVisibilityRange(ActivePlayerState observer, float targetX, float targetY)

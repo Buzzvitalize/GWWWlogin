@@ -28,4 +28,21 @@ public sealed class GameServerBridgeClient(
             return [];
         }
     }
+
+    public async Task<IReadOnlyList<WorldBridgeEntityUpdate>> GetEventsAsync(long afterSequenceId, int take, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var events = await httpClient.GetFromJsonAsync<List<WorldBridgeEntityUpdate>>(
+                $"/world/events?afterSequenceId={afterSequenceId}&take={take}",
+                cancellationToken);
+
+            return events ?? [];
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "GameServer bridge events request failed against {BaseUrl}", _options.BaseUrl);
+            return [];
+        }
+    }
 }

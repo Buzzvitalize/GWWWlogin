@@ -25,4 +25,6 @@ public sealed class ActivePlayerState
     public DateTime EnteredMapAtUtc { get; init; }
 
     public long LastSeenBroadcastSequence { get; set; }
+
+    public long LastSeenGameServerSequence { get; set; }
 }

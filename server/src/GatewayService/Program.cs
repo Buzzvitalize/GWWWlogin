@@ -24,7 +24,6 @@ builder.Services.AddHttpClient<IGameServerBridgeClient, GameServerBridgeClient>(
 });
 builder.Services.AddScoped<IGatewaySessionService, GatewaySessionService>();
 builder.Services.AddHostedService<TcpGatewayHostedService>();
-builder.Services.AddHostedService<WorldSimulationHostedService>();
 
 var app = builder.Build();
 
@@ -42,6 +41,7 @@ app.MapGet("/health", async (IConfiguration configuration, GatewayDbContext dbCo
         tcpPort = options.Port,
         publicHost = options.PublicHost,
         gameServerBaseUrl = gameServerBridge.BaseUrl,
+        worldRuntimeOwner = "game-server",
         sessions = sessionCount,
         maps = mapDefinitionService.GetAll().Count,
         supportedCommands = new[] { "HELLO", "ENTER_MAP", "PING", "WHOAMI", "MOVE", "LEAVE", "POLL", "AROUND" },
