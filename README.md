@@ -76,7 +76,7 @@ Lee `docs/getting-started.md` y luego revisa `server/src/LoginService/Program.cs
 
 ## Siguientes pasos sugeridos
 
-1. conectar las transiciones derivadas de `Address.ini` con un comando real de cambio de mapa en el gateway;
-2. ampliar la extracción de NPCs reales más allá de ciudades base para cubrir mapas newbie y zonas abiertas;
+1. endurecer el comando `TRAVEL` con reglas explícitas de validación, cooldowns y respuesta de error por destino no resuelto;
+2. ampliar la extracción de NPCs reales más allá de los mapas con señal fuerte en `Quest.xml`, especialmente para zonas abiertas adicionales;
 3. sustituir la siembra sintética de monstruos por spawns persistentes/importados por escena;
-4. validar la conexión end-to-end del cliente con `Gw Client/config.ini` ya alineado a `GatewayService` (`PORT=6001`).
+4. validar la conexión end-to-end del cliente con `Gw Client/config.ini` usando el host correcto (`IP=127.1.1.110`) y el puerto actual del gateway (`PORT=6001`).

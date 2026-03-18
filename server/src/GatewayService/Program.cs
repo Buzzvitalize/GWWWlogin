@@ -46,7 +46,7 @@ app.MapGet("/health", async (IConfiguration configuration, GatewayDbContext dbCo
         worldRuntimeOwner = "game-server",
         sessions = sessionCount,
         maps = mapDefinitionService.GetAll().Count,
-        supportedCommands = new[] { "HELLO", "ENTER_MAP", "PING", "WHOAMI", "MOVE", "LEAVE", "POLL", "AROUND" },
+        supportedCommands = new[] { "HELLO", "ENTER_MAP", "PING", "WHOAMI", "MOVE", "TRAVEL", "LEAVE", "POLL", "AROUND" },
         handshakeVersion = GatewayProtocolSerializer.HandshakeVersion,
         worldEventVersion = GatewayProtocolSerializer.WorldEventVersion,
         aroundVersion = GatewayProtocolSerializer.AroundVersion,

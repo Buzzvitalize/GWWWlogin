@@ -20,6 +20,8 @@ public interface IMapStateService
 
     ActivePlayerState? Move(Guid sessionId, float positionX, float positionY);
 
+    ActivePlayerState? Travel(Guid sessionId, string sceneName, int mapId, float positionX, float positionY);
+
     ActivePlayerState? Leave(Guid sessionId);
 
     IReadOnlyList<PlayerPresence> GetPlayers(int mapId);

@@ -25,7 +25,7 @@ using (var scope = app.Services.CreateScope())
 
 var servers = new List<ServerInfo>
 {
-    new(1, "Local Development", "127.1.1.110", 5999, "Online")
+    new(1, "Local Development", "127.1.1.110", 6001, "Online")
 };
 
 app.MapGet("/health", async (AuthDbContext dbContext, IClientMapCatalog mapCatalog, CancellationToken cancellationToken) =>

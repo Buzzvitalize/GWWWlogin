@@ -26,6 +26,7 @@ public sealed class GameWorldService : IGameWorldService
                 options.ZoneSize,
                 map.DefaultSpawnX,
                 map.DefaultSpawnY,
+                map.Addresses.Select(address => (address.PositionX, address.PositionY)).ToList(),
                 map.Monsters,
                 new GameMapRuntimeState(
                     map.MapId,
@@ -109,15 +110,19 @@ public sealed class GameWorldService : IGameWorldService
         {
             foreach (var monster in map.Monsters.Select((monster, index) => (monster, index)).Take(8))
             {
-                var offsetX = (monster.index % 4) * 18f;
-                var offsetY = (monster.index / 4) * 18f;
+                var anchor = map.AnchorPoints.Count > 0
+                    ? map.AnchorPoints[monster.index % map.AnchorPoints.Count]
+                    : (map.AnchorX, map.AnchorY);
+                var clusterIndex = monster.index / Math.Max(1, map.AnchorPoints.Count);
+                var offsetX = (clusterIndex % 4) * 18f;
+                var offsetY = (clusterIndex / 4) * 18f;
                 SeedMonster(
                     map.MapId,
                     _maps[map.MapId].SceneName,
                     $"monster:{map.MapId}:{monster.monster.MonsterKey}:{monster.index}",
                     monster.monster.DisplayName,
-                    map.AnchorX + offsetX,
-                    map.AnchorY + offsetY);
+                    anchor.Item1 + offsetX,
+                    anchor.Item2 + offsetY);
             }
         }
     }
@@ -186,5 +191,5 @@ public sealed class GameWorldService : IGameWorldService
         return $"zone:{zoneX}:{zoneY}";
     }
 
-    private sealed record ConfiguredMapState(int MapId, int ZoneSize, float AnchorX, float AnchorY, IReadOnlyList<ClientMonsterTemplate> Monsters, GameMapRuntimeState RuntimeState);
+    private sealed record ConfiguredMapState(int MapId, int ZoneSize, float AnchorX, float AnchorY, IReadOnlyList<(float X, float Y)> AnchorPoints, IReadOnlyList<ClientMonsterTemplate> Monsters, GameMapRuntimeState RuntimeState);
 }

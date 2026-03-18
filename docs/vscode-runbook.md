@@ -90,11 +90,11 @@ El compound sirve para arrancar los tres procesos desde VS Code.
 7. pedir gateway ticket;
 8. conectar cliente TCP al gateway;
 9. consultar `/maps` para confirmar el catálogo cargado desde el cliente;
-10. probar `HELLO`, `ENTER_MAP`, `AROUND` y `POLL`.
+10. probar `HELLO`, `ENTER_MAP`, `TRAVEL`, `AROUND` y `POLL`.
 
 ## 8. Configuración del cliente legado
 
-El cliente toma el host y puerto desde `Gw Client/config.ini`. Ahora el repo ya deja `PORT=6001` para alinearlo con `GatewayService`, y debes ajustar el host real donde publiques el gateway.
+El cliente toma el host y puerto desde `Gw Client/config.ini`. Ahora el repo ya deja `IP=127.1.1.110` y `PORT=6001`; si cambias el host público del gateway, debes reflejar esa IP/host aquí.
 
 ### Local / VS Code
 

@@ -138,6 +138,7 @@ curl -fsS -X POST http://127.0.0.1:5000/api/sessions/REEMPLAZAR_TOKEN/gateway-ti
 printf 'HELLO REEMPLAZAR_TOKEN\n' | nc 127.0.0.1 6001
 printf 'ENTER_MAP REEMPLAZAR_TOKEN\n' | nc 127.0.0.1 6001
 printf 'AROUND REEMPLAZAR_TOKEN\n' | nc 127.0.0.1 6001
+printf 'TRAVEL REEMPLAZAR_TOKEN 1\n' | nc 127.0.0.1 6001
 printf 'POLL REEMPLAZAR_TOKEN\n' | nc 127.0.0.1 6001
 ```
 
@@ -152,7 +153,8 @@ printf 'POLL REEMPLAZAR_TOKEN\n' | nc 127.0.0.1 6001
 7. enviar `HELLO <token>`;
 8. enviar `ENTER_MAP <token>`;
 9. enviar `AROUND <token>`;
-10. enviar `POLL <token>`.
+10. enviar `TRAVEL <token> <transitionIndex>` si quieres probar una transición;
+11. enviar `POLL <token>`.
 
 ## 6. Qué deberías ver
 

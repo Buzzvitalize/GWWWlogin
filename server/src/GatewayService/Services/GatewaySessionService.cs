@@ -5,11 +5,12 @@ using GWWWlogin.GatewayService.Models;
 using GWWWlogin.GatewayService.Protocols;
 using GWWWlogin.GatewayService.World;
 using GWWWlogin.Shared;
+using GWWWlogin.Shared.Maps;
 using Microsoft.EntityFrameworkCore;
 
 namespace GWWWlogin.GatewayService.Services;
 
-public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateService mapStateService, IMapDefinitionService mapDefinitionService, IMapBroadcastService mapBroadcastService, IGameServerBridgeClient gameServerBridgeClient) : IGatewaySessionService
+public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateService mapStateService, IMapDefinitionService mapDefinitionService, IMapBroadcastService mapBroadcastService, IGameServerBridgeClient gameServerBridgeClient, IClientMapCatalog mapCatalog) : IGatewaySessionService
 {
     private const float VisibilityRadius = 180f;
 
@@ -31,6 +32,7 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
             "PING" when parts.Length == 2 => await HandlePingAsync(token, cancellationToken),
             "WHOAMI" when parts.Length == 2 => await HandleWhoAmIAsync(token, cancellationToken),
             "MOVE" when parts.Length == 4 && float.TryParse(parts[2], out var x) && float.TryParse(parts[3], out var y) => await HandleMoveAsync(token, x, y, cancellationToken),
+            "TRAVEL" when parts.Length == 3 && int.TryParse(parts[2], out var transitionIndex) => await HandleTravelAsync(token, transitionIndex, cancellationToken),
             "LEAVE" when parts.Length == 2 => await HandleLeaveAsync(token, cancellationToken),
             "POLL" when parts.Length == 2 => await HandlePollAsync(token, cancellationToken),
             "AROUND" when parts.Length == 2 => await HandleAroundAsync(token, cancellationToken),
@@ -232,6 +234,99 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
             $"MOVE_OK {state.MapId} {state.PositionX} {state.PositionY}");
     }
 
+    private async Task<GatewayCommandResult> HandleTravelAsync(string token, int transitionIndex, CancellationToken cancellationToken)
+    {
+        var session = await dbContext.Sessions
+            .Include(x => x.SelectedCharacter)
+            .SingleOrDefaultAsync(x => x.Token == token, cancellationToken);
+
+        if (session is null)
+        {
+            return new GatewayCommandResult(false, "ERROR session_not_found");
+        }
+
+        if (session.ExpiresAtUtc <= DateTime.UtcNow)
+        {
+            return new GatewayCommandResult(false, "ERROR session_expired");
+        }
+
+        var state = mapStateService.GetBySession(session.Id);
+        if (state is null)
+        {
+            return new GatewayCommandResult(false, "ERROR player_not_in_map");
+        }
+
+        var currentMap = mapCatalog.GetById(state.MapId);
+        if (currentMap is null)
+        {
+            return new GatewayCommandResult(false, "ERROR map_definition_not_found");
+        }
+
+        if (transitionIndex <= 0 || transitionIndex > currentMap.Addresses.Count)
+        {
+            return new GatewayCommandResult(false, "ERROR transition_not_found");
+        }
+
+        var transition = currentMap.Addresses[transitionIndex - 1];
+        var destinationMap = ResolveDestinationMap(currentMap, transition.Name);
+        var destinationScene = destinationMap?.SceneName ?? currentMap.SceneName;
+        var destinationMapId = destinationMap?.MapId ?? currentMap.MapId;
+        var destinationX = destinationMap?.DefaultSpawnX ?? transition.PositionX;
+        var destinationY = destinationMap?.DefaultSpawnY ?? transition.PositionY;
+
+        var previousMapId = state.MapId;
+        var previousScene = state.SceneName;
+        var previousX = state.PositionX;
+        var previousY = state.PositionY;
+
+        var nextState = mapStateService.Travel(session.Id, destinationScene, destinationMapId, destinationX, destinationY);
+        if (nextState is null)
+        {
+            return new GatewayCommandResult(false, "ERROR player_not_in_map");
+        }
+
+        if (session.SelectedCharacter is not null)
+        {
+            session.SelectedCharacter.SceneName = destinationScene;
+            session.SelectedCharacter.MapId = destinationMapId;
+            session.SelectedCharacter.PositionX = destinationX;
+            session.SelectedCharacter.PositionY = destinationY;
+            session.SelectedCharacter.UpdatedAtUtc = DateTime.UtcNow;
+        }
+
+        session.LastSeenAtUtc = DateTime.UtcNow;
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        mapBroadcastService.Publish(previousMapId, new MapBroadcastEvent(
+            0,
+            "LEAVE",
+            nextState.SessionId,
+            nextState.CharacterName,
+            previousScene,
+            previousX,
+            previousY,
+            DateTime.UtcNow,
+            "player",
+            nextState.CharacterId.ToString()));
+
+        var enterEvent = mapBroadcastService.Publish(destinationMapId, new MapBroadcastEvent(
+            0,
+            "ENTER",
+            nextState.SessionId,
+            nextState.CharacterName,
+            destinationScene,
+            destinationX,
+            destinationY,
+            DateTime.UtcNow,
+            "player",
+            nextState.CharacterId.ToString()));
+
+        nextState.LastSeenBroadcastSequence = enterEvent.SequenceId;
+        nextState.LastSeenGameServerSequence = 0;
+
+        return new GatewayCommandResult(true, $"TRAVEL_OK {destinationScene} {destinationMapId} {destinationX} {destinationY} {transitionIndex} {transition.Name}");
+    }
+
     private async Task<GatewayCommandResult> HandleLeaveAsync(string token, CancellationToken cancellationToken)
     {
         var session = await dbContext.Sessions
@@ -379,6 +474,52 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
             update.OccurredAtUtc,
             update.EntityKind,
             update.EntityInstanceId);
+    }
+
+    private ClientMapDefinition? ResolveDestinationMap(ClientMapDefinition currentMap, string transitionName)
+    {
+        var normalizedTransition = NormalizeLabel(transitionName);
+        if (string.IsNullOrWhiteSpace(normalizedTransition))
+        {
+            return null;
+        }
+
+        return mapCatalog.GetAll()
+            .Where(map => map.MapId != currentMap.MapId)
+            .Select(map => new { Map = map, Score = ScoreTransitionTarget(map, normalizedTransition) })
+            .Where(x => x.Score > 0)
+            .OrderByDescending(x => x.Score)
+            .ThenBy(x => x.Map.SceneName.Length)
+            .Select(x => x.Map)
+            .FirstOrDefault();
+    }
+
+    private static int ScoreTransitionTarget(ClientMapDefinition map, string normalizedTransition)
+    {
+        var scene = NormalizeLabel(map.SceneName);
+        var baseScene = NormalizeLabel(RemoveSceneSuffix(map.SceneName));
+
+        if (scene == normalizedTransition) return 300;
+        if (baseScene == normalizedTransition) return 250;
+        if (scene.Contains(normalizedTransition, StringComparison.OrdinalIgnoreCase)) return 120;
+        if (baseScene.Contains(normalizedTransition, StringComparison.OrdinalIgnoreCase)) return 100;
+        if (normalizedTransition.Contains(baseScene, StringComparison.OrdinalIgnoreCase)) return 90;
+        return 0;
+    }
+
+    private static string RemoveSceneSuffix(string sceneName)
+    {
+        return sceneName
+            .Replace("_All", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("_Newbie", string.Empty, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string NormalizeLabel(string value)
+    {
+        return new string(value
+            .Where(char.IsLetterOrDigit)
+            .Select(char.ToLowerInvariant)
+            .ToArray());
     }
 
     private static bool IsWithinVisibilityRange(ActivePlayerState observer, float targetX, float targetY)

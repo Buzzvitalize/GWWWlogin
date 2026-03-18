@@ -66,6 +66,23 @@ public sealed class MapStateService(IMapDefinitionService mapDefinitionService) 
         return state;
     }
 
+    public ActivePlayerState? Travel(Guid sessionId, string sceneName, int mapId, float positionX, float positionY)
+    {
+        if (!_playersBySession.TryGetValue(sessionId, out var state))
+        {
+            return null;
+        }
+
+        EnsureMapEntitiesLoaded(mapId);
+
+        state.SceneName = sceneName;
+        state.MapId = mapId;
+        state.PositionX = positionX;
+        state.PositionY = positionY;
+        state.EnteredMapAtUtc = DateTime.UtcNow;
+        return state;
+    }
+
     public ActivePlayerState? Leave(Guid sessionId)
     {
         return _playersBySession.TryRemove(sessionId, out var state)
