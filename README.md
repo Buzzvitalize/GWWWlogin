@@ -62,6 +62,7 @@ Consulta `docs/progress-roadmap.md` para ver en qué nivel vamos, qué terminamo
 ## Ejecución reproducible
 
 Consulta `docs/vscode-runbook.md` para abrir el repo en VS Code / GitHub y levantar `LoginService`, `GatewayService` y `GameServer` paso a paso.
+Ahí también queda documentada la configuración nueva de `GameServer` (`Host`, `Port`, `ZoneSize`, `SimulationTickMilliseconds`, `MaxSeedMonstersPerMap`, `StepDistance`, `RecentEventLimit`) y cómo alinearla con `GameServerBridge__BaseUrl`.
 
 Para la primera corrida con cliente, usa también `docs/client-first-run-checklist.md`, donde queda explicado qué tocar en `Gw Client/config.ini` para local y para GitHub/Codespaces.
 

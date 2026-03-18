@@ -8,18 +8,23 @@ namespace GWWWlogin.GameServer.World;
 
 public sealed class GameWorldService : IGameWorldService
 {
-    private const float StepDistance = 12f;
-
     private readonly ConcurrentDictionary<int, GameMapRuntimeState> _maps;
     private readonly ConcurrentDictionary<string, GameMonsterRuntimeState> _monstersByInstanceId = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<int, IReadOnlyList<GameMonsterRuntimeState>> _monstersByMap = new();
     private readonly ConcurrentQueue<WorldBridgeEntityUpdate> _recentUpdates = new();
     private readonly IReadOnlyDictionary<int, int> _zoneSizeByMap;
+    private readonly float _stepDistance;
+    private readonly int _recentEventLimit;
+    private readonly int _maxSeedMonstersPerMap;
     private long _updateSequence;
 
     public GameWorldService(IOptions<GameServerOptions> optionsAccessor, IClientMapCatalog mapCatalog)
     {
         var options = optionsAccessor.Value;
+        _stepDistance = options.StepDistance;
+        _recentEventLimit = options.RecentEventLimit;
+        _maxSeedMonstersPerMap = options.MaxSeedMonstersPerMap;
+
         var configuredMaps = mapCatalog.GetAll()
             .Select(map => new ConfiguredMapState(
                 map.MapId,
@@ -33,7 +38,7 @@ public sealed class GameWorldService : IGameWorldService
                     map.SceneName,
                     options.ZoneSize,
                     0,
-                    Math.Min(map.Monsters.Count, 8),
+                    Math.Min(map.Monsters.Count, _maxSeedMonstersPerMap),
                     0,
                     DateTime.UtcNow)))
             .OrderBy(x => x.MapId)
@@ -95,7 +100,7 @@ public sealed class GameWorldService : IGameWorldService
             foreach (var monster in monsters.Where(x => x.IsAlive))
             {
                 var direction = nextTick % 2 == 0 ? -1f : 1f;
-                monster.PositionX += StepDistance * direction;
+                monster.PositionX += _stepDistance * direction;
                 monster.ZoneKey = BuildZoneKey(map.MapId, monster.PositionX, monster.PositionY);
                 monster.LastUpdatedAtUtc = DateTime.UtcNow;
 
@@ -108,7 +113,7 @@ public sealed class GameWorldService : IGameWorldService
     {
         foreach (var map in maps)
         {
-            foreach (var monster in map.Monsters.Select((monster, index) => (monster, index)).Take(8))
+            foreach (var monster in map.Monsters.Select((monster, index) => (monster, index)).Take(_maxSeedMonstersPerMap))
             {
                 var anchor = map.AnchorPoints.Count > 0
                     ? map.AnchorPoints[monster.index % map.AnchorPoints.Count]
@@ -164,7 +169,7 @@ public sealed class GameWorldService : IGameWorldService
             monster.ZoneKey,
             DateTime.UtcNow));
 
-        while (_recentUpdates.Count > 200 && _recentUpdates.TryDequeue(out _))
+        while (_recentUpdates.Count > _recentEventLimit && _recentUpdates.TryDequeue(out _))
         {
         }
     }

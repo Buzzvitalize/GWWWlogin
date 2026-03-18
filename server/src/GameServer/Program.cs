@@ -2,22 +2,33 @@ using GWWWlogin.GameServer.HostedServices;
 using GWWWlogin.GameServer.Models;
 using GWWWlogin.GameServer.World;
 using GWWWlogin.Shared.Maps;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.Configure<GameServerOptions>(builder.Configuration.GetSection(GameServerOptions.SectionName));
+builder.Services
+    .AddOptions<GameServerOptions>()
+    .Bind(builder.Configuration.GetSection(GameServerOptions.SectionName))
+    .ValidateDataAnnotations()
+    .Validate(options => !string.IsNullOrWhiteSpace(options.Host), "GameServer:Host is required.")
+    .ValidateOnStart();
+
+var configuredOptions = builder.Configuration.GetSection(GameServerOptions.SectionName).Get<GameServerOptions>() ?? new GameServerOptions();
+builder.WebHost.UseUrls($"http://{configuredOptions.Host}:{configuredOptions.Port}");
+
 builder.Services.AddSingleton<IClientMapCatalog, ClientMapCatalog>();
 builder.Services.AddSingleton<IGameWorldService, GameWorldService>();
 builder.Services.AddHostedService<ZoneSimulationHostedService>();
 
 var app = builder.Build();
 
-app.MapGet("/health", (IConfiguration configuration, IGameWorldService gameWorldService, IClientMapCatalog mapCatalog) =>
+app.MapGet("/health", (IOptions<GameServerOptions> optionsAccessor, IGameWorldService gameWorldService, IClientMapCatalog mapCatalog) =>
 {
-    var options = configuration.GetSection(GameServerOptions.SectionName).Get<GameServerOptions>() ?? new GameServerOptions();
+    var options = optionsAccessor.Value;
+    var configuredMaps = mapCatalog.GetAll();
     var maps = gameWorldService.GetMaps();
-    var transitions = mapCatalog.GetAll().Sum(map => map.Addresses.Count);
-    var npcs = mapCatalog.GetAll().Sum(map => map.Npcs.Count);
+    var transitions = configuredMaps.Sum(map => map.Addresses.Count);
+    var npcs = configuredMaps.Sum(map => map.Npcs.Count);
 
     return Results.Ok(new
     {
@@ -26,7 +37,11 @@ app.MapGet("/health", (IConfiguration configuration, IGameWorldService gameWorld
         host = options.Host,
         port = options.Port,
         zoneSize = options.ZoneSize,
-        configuredMaps = mapCatalog.GetAll().Count,
+        simulationTickMilliseconds = options.SimulationTickMilliseconds,
+        maxSeedMonstersPerMap = options.MaxSeedMonstersPerMap,
+        stepDistance = options.StepDistance,
+        recentEventLimit = options.RecentEventLimit,
+        configuredMaps = configuredMaps.Count,
         configuredTransitions = transitions,
         configuredNpcs = npcs,
         maps,
@@ -35,6 +50,7 @@ app.MapGet("/health", (IConfiguration configuration, IGameWorldService gameWorld
 });
 
 app.MapGet("/maps", (IGameWorldService gameWorldService) => Results.Ok(gameWorldService.GetMaps()));
+app.MapGet("/world/config", (IOptions<GameServerOptions> optionsAccessor) => Results.Ok(optionsAccessor.Value));
 app.MapGet("/world/maps", (IGameWorldService gameWorldService) => Results.Ok(gameWorldService.GetMaps()));
 app.MapGet("/world/transitions", (IClientMapCatalog mapCatalog, int? mapId) =>
 {

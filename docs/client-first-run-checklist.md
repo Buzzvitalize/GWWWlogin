@@ -22,6 +22,7 @@ Confirma este orden:
 ### GameServer
 - `GET /health`
 - `GET /maps`
+- `GET /world/config`
 - `GET /world/maps`
 - `GET /world/transitions?mapId=1001`
 - `GET /world/monsters?mapId=1001`
@@ -29,6 +30,7 @@ Confirma este orden:
 
 Qué observar:
 - que `SimulationTick` avance;
+- que `/world/config` refleje el `Host`/`Port` y parámetros de simulación esperados;
 - que `/maps` y `/world/maps` devuelvan el catálogo de escenas derivado del cliente;
 - que `/world/transitions` devuelva puntos de entrada/salida del mapa;
 - que existan monstruos en `Athens_Newbie` o `Sparta_Newbie`;
@@ -101,6 +103,7 @@ docker compose up -d
 curl -fsS http://127.0.0.1:5000/health
 curl -fsS http://127.0.0.1:5100/health
 curl -fsS http://127.0.0.1:5100/maps
+curl -fsS http://127.0.0.1:5100/world/config
 curl -fsS http://127.0.0.1:5100/world/maps
 curl -fsS "http://127.0.0.1:5100/world/transitions?mapId=1001"
 curl -fsS "http://127.0.0.1:5100/world/monsters?mapId=1001"

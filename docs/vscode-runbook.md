@@ -74,12 +74,32 @@ El compound sirve para arrancar los tres procesos desde VS Code.
 ### GameServer
 - `GET /health`
 - `GET /maps`
+- `GET /world/config`
 - `GET /world/maps`
 - `GET /world/transitions`
 - `GET /world/monsters`
 - `GET /world/events`
 
-## 7. Flujo manual mínimo para observar el sistema
+## 7. Configuración útil de GameServer
+
+El `GameServer` ahora consume configuración propia desde `server/src/GameServer/appsettings.json` o variables de entorno:
+
+- `GameServer__Host` y `GameServer__Port`: endpoint HTTP real que expondrá `/health`, `/maps` y `/world/*`;
+- `GameServer__ZoneSize`: tamaño de zona usado para calcular `zone:*:*`;
+- `GameServer__SimulationTickMilliseconds`: frecuencia del loop de simulación;
+- `GameServer__MaxSeedMonstersPerMap`: límite de monstruos sembrados por mapa;
+- `GameServer__StepDistance`: distancia horizontal recorrida por tick;
+- `GameServer__RecentEventLimit`: tamaño del buffer de eventos consumido por el bridge.
+
+Si cambias `GameServer__Host` o `GameServer__Port`, actualiza también `GameServerBridge__BaseUrl` en `GatewayService`, porque el gateway depende de esa URL para `POLL` y `AROUND`.
+
+Puedes validar rápidamente la configuración efectiva con:
+
+```bash
+curl -fsS http://127.0.0.1:5100/world/config
+```
+
+## 8. Flujo manual mínimo para observar el sistema
 
 1. levantar dependencias con Docker;
 2. correr `LoginService`;
@@ -92,7 +112,7 @@ El compound sirve para arrancar los tres procesos desde VS Code.
 9. consultar `/maps` para confirmar el catálogo cargado desde el cliente;
 10. probar `HELLO`, `ENTER_MAP`, `TRAVEL`, `AROUND` y `POLL`.
 
-## 8. Configuración del cliente legado
+## 9. Configuración del cliente legado
 
 El cliente toma el host y puerto desde `Gw Client/config.ini`. Ahora el repo ya deja `IP=127.1.1.110` y `PORT=6001`; si cambias el host público del gateway, debes reflejar esa IP/host aquí.
 
@@ -109,11 +129,11 @@ El cliente toma el host y puerto desde `Gw Client/config.ini`. Ahora el repo ya 
 - usa en `Gw Client/config.ini` el host/puerto público real que te entregue Codespaces o tu túnel;
 - si el backend anuncia `PublicHost`, actualízalo para que refleje ese mismo endpoint.
 
-## 9. Checklist operativa
+## 10. Checklist operativa
 
 Consulta también `docs/client-first-run-checklist.md` para una pasada más operativa de endpoints, comandos y señales de problema, incluyendo ejemplos copy/paste para local y host remoto.
 
-## 10. Qué sigue después de esta guía
+## 11. Qué sigue después de esta guía
 
 Una vez que esto esté corrido de punta a punta, el siguiente paso recomendado es:
 
