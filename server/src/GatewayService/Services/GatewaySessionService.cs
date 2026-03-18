@@ -4,11 +4,12 @@ using GWWWlogin.GatewayService.Definitions;
 using GWWWlogin.GatewayService.Models;
 using GWWWlogin.GatewayService.Protocols;
 using GWWWlogin.GatewayService.World;
+using GWWWlogin.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace GWWWlogin.GatewayService.Services;
 
-public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateService mapStateService, IMapDefinitionService mapDefinitionService, IMapBroadcastService mapBroadcastService) : IGatewaySessionService
+public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateService mapStateService, IMapDefinitionService mapDefinitionService, IMapBroadcastService mapBroadcastService, IGameServerBridgeClient gameServerBridgeClient) : IGatewaySessionService
 {
     private const float VisibilityRadius = 180f;
 
@@ -315,9 +316,38 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
             .Where(x => x.SessionId != state.SessionId)
             .ToList();
         var npcs = mapStateService.GetNpcsInRange(state.MapId, state.PositionX, state.PositionY, VisibilityRadius);
-        var monsters = mapStateService.GetMonstersInRange(state.MapId, state.PositionX, state.PositionY, VisibilityRadius);
+        var monsters = await GetVisibleMonstersAsync(state, cancellationToken);
 
         return new GatewayCommandResult(true, GatewayProtocolSerializer.FormatAround(players, npcs, monsters));
+    }
+
+    private async Task<IReadOnlyList<MonsterSpawnState>> GetVisibleMonstersAsync(ActivePlayerState observer, CancellationToken cancellationToken)
+    {
+        var bridgeMonsters = await gameServerBridgeClient.GetMonstersAsync(observer.MapId, cancellationToken);
+        if (bridgeMonsters.Count > 0)
+        {
+            return bridgeMonsters
+                .Where(x => IsWithinVisibilityRange(observer, x.PositionX, x.PositionY))
+                .Select(ToMonsterSpawnState)
+                .ToList();
+        }
+
+        return mapStateService.GetMonstersInRange(observer.MapId, observer.PositionX, observer.PositionY, VisibilityRadius);
+    }
+
+    private static MonsterSpawnState ToMonsterSpawnState(WorldBridgeMonsterSnapshot monster)
+    {
+        return new MonsterSpawnState(
+            monster.InstanceId,
+            string.Empty,
+            monster.DisplayName,
+            monster.SceneName,
+            monster.MapId,
+            monster.PositionX,
+            monster.PositionY,
+            monster.ZoneKey,
+            monster.IsAlive,
+            monster.LastUpdatedAtUtc);
     }
 
     private static bool IsWithinVisibilityRange(ActivePlayerState observer, float targetX, float targetY)

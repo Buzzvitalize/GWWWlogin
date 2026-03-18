@@ -11,11 +11,17 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<GatewayOptions>(builder.Configuration.GetSection(GatewayOptions.SectionName));
+builder.Services.Configure<GameServerBridgeOptions>(builder.Configuration.GetSection(GameServerBridgeOptions.SectionName));
 builder.Services.AddDbContext<GatewayDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("AuthDb")));
 builder.Services.AddSingleton<IMapDefinitionService, MapDefinitionService>();
 builder.Services.AddSingleton<IMapStateService, MapStateService>();
 builder.Services.AddSingleton<IMapBroadcastService, MapBroadcastService>();
+builder.Services.AddHttpClient<IGameServerBridgeClient, GameServerBridgeClient>((serviceProvider, httpClient) =>
+{
+    var options = serviceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<GameServerBridgeOptions>>().Value;
+    httpClient.BaseAddress = new Uri(options.BaseUrl);
+});
 builder.Services.AddScoped<IGatewaySessionService, GatewaySessionService>();
 builder.Services.AddHostedService<TcpGatewayHostedService>();
 builder.Services.AddHostedService<WorldSimulationHostedService>();
@@ -25,6 +31,7 @@ var app = builder.Build();
 app.MapGet("/health", async (IConfiguration configuration, GatewayDbContext dbContext, IMapDefinitionService mapDefinitionService, CancellationToken cancellationToken) =>
 {
     var options = configuration.GetSection(GatewayOptions.SectionName).Get<GatewayOptions>() ?? new GatewayOptions();
+    var gameServerBridge = configuration.GetSection(GameServerBridgeOptions.SectionName).Get<GameServerBridgeOptions>() ?? new GameServerBridgeOptions();
     var sessionCount = await dbContext.Sessions.CountAsync(cancellationToken);
 
     return Results.Ok(new
@@ -34,6 +41,7 @@ app.MapGet("/health", async (IConfiguration configuration, GatewayDbContext dbCo
         tcpHost = options.Host,
         tcpPort = options.Port,
         publicHost = options.PublicHost,
+        gameServerBaseUrl = gameServerBridge.BaseUrl,
         sessions = sessionCount,
         maps = mapDefinitionService.GetAll().Count,
         supportedCommands = new[] { "HELLO", "ENTER_MAP", "PING", "WHOAMI", "MOVE", "LEAVE", "POLL", "AROUND" },

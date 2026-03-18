@@ -46,7 +46,7 @@ Construir un backend propio, mantenible y documentado, sin copiar archivos propi
 20. emitir actualización dinámica básica de monstruos por zona y reflejarla en `POLL <token>`.
 21. estabilizar contrato del gateway con `HANDSHAKE_OK|version=...`, `EVENTS|version=...` y `AROUND|version=...`.
 
-Siguiente foco recomendado: mover el bridge interno de runtime desde `GameServer` hacia `GatewayService`, y después preparar la configuración reproducible para VS Code/GitHub.
+Siguiente foco recomendado: el primer bridge real ya entra por monstruos vivos en `AROUND`; lo siguiente es llevar también eventos/runtime a `POLL` y luego preparar la configuración reproducible para VS Code/GitHub.
 
 ### Nivel 4 - Separación de GameServer
 22. crear proyecto `GameServer`;

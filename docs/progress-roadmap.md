@@ -91,10 +91,11 @@ Cuando cambiemos de nivel lo vamos a dejar anotado aquí con esta frase:
 - servicio base `GameWorldService`;
 - loop inicial `ZoneSimulationHostedService`;
 - snapshots internos `/world/maps`, `/world/monsters`, `/world/events`;
+- primer bridge real `GatewayService -> GameServer` para monstruos vivos en `AROUND`;
 - primer corte documental entre gateway y runtime de mundo.
 
 ### Qué sigue después
-- conectar `GatewayService` al bridge interno de `GameServer`;
+- llevar también eventos/runtime de `GameServer` hacia `POLL`;
 - seguir moviendo simulación viva fuera del gateway;
 - preparar guía reproducible para VS Code/GitHub y ejecución local;
 - maps reales.
