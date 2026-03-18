@@ -30,6 +30,12 @@ Usaremos **C# con .NET 8** como objetivo del proyecto porque ofrece:
 - tokens de sesión más completos;
 - bans, roles y auditoría.
 
+### Fase 2.1 (nivel actual)
+- crear personaje;
+- listar personajes por cuenta;
+- definir punto inicial de spawn;
+- dejar anotado el siguiente paso.
+
 ### Fase 3
 - gateway TCP;
 - handshake;
@@ -56,9 +62,9 @@ Lee estos archivos en este orden:
 
 ## 6. Próximo paso recomendado
 
-Cuando quieras, seguimos con una de estas tareas:
+Cuando terminemos este nivel, seguimos con una de estas tareas:
 
-1. crear la tabla de personajes;
+1. crear selección de personaje;
 2. agregar migrations formales de EF Core;
 3. emitir session tokens persistidos;
 4. crear el gateway TCP del juego.

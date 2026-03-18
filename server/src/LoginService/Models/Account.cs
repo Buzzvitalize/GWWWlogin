@@ -14,6 +14,8 @@ public sealed class Account
 
     public string PasswordHash { get; set; } = string.Empty;
 
+    public ICollection<Character> Characters { get; set; } = new List<Character>();
+
     public DateTime CreatedAtUtc { get; set; }
 
     public DateTime UpdatedAtUtc { get; set; }

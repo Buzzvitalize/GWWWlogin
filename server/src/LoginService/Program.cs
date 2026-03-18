@@ -1,4 +1,5 @@
 using GWWWlogin.LoginService.Data;
+using GWWWlogin.LoginService.Extensions;
 using GWWWlogin.LoginService.Services;
 using GWWWlogin.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("AuthDb")));
 
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<ICharacterService, CharacterService>();
 
 var app = builder.Build();
 
@@ -26,13 +28,15 @@ var servers = new List<ServerInfo>
 app.MapGet("/health", async (AuthDbContext dbContext, CancellationToken cancellationToken) =>
 {
     var accountCount = await dbContext.Accounts.CountAsync(cancellationToken);
+    var characterCount = await dbContext.Characters.CountAsync(cancellationToken);
 
     return Results.Ok(new
     {
         service = "login-service",
         status = "ok",
         utc = DateTime.UtcNow,
-        accounts = accountCount
+        accounts = accountCount,
+        characters = characterCount
     });
 });
 
@@ -85,6 +89,67 @@ app.MapPost("/api/login", async (
     return response.Success
         ? Results.Ok(response)
         : Results.Json(response, statusCode: StatusCodes.Status401Unauthorized);
+});
+
+app.MapGet("/api/accounts/{accountId:guid}/characters", async (
+    Guid accountId,
+    ICharacterService characterService,
+    CancellationToken cancellationToken) =>
+{
+    var characters = await characterService.GetByAccountAsync(accountId, cancellationToken);
+    return Results.Ok(characters);
+});
+
+app.MapPost("/api/characters", async (
+    CreateCharacterRequest request,
+    ICharacterService characterService,
+    CancellationToken cancellationToken) =>
+{
+    if (!request.Name.HasValidCharacterPayload(3, 24) ||
+        !request.Class.HasValidCharacterPayload(3, 24) ||
+        !request.Gender.HasValidCharacterPayload(3, 16))
+    {
+        return Results.BadRequest(new
+        {
+            message = "Character name, class and gender are required with valid lengths."
+        });
+    }
+
+    if (!request.Class.IsAllowedCharacterClass())
+    {
+        return Results.BadRequest(new
+        {
+            message = "Class must be Warrior, Mage or Champion."
+        });
+    }
+
+    if (!request.Gender.IsAllowedCharacterGender())
+    {
+        return Results.BadRequest(new
+        {
+            message = "Gender must be Male or Female."
+        });
+    }
+
+    try
+    {
+        var response = await characterService.CreateAsync(request, cancellationToken);
+        return Results.Created($"/api/characters/{response.Id}", response);
+    }
+    catch (KeyNotFoundException ex)
+    {
+        return Results.NotFound(new
+        {
+            message = ex.Message
+        });
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.Conflict(new
+        {
+            message = ex.Message
+        });
+    }
 });
 
 app.Run();

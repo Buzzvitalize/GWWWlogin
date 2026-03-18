@@ -6,6 +6,8 @@
 Responsable de:
 - registrar cuentas;
 - autenticar usuarios;
+- crear personajes iniciales;
+- listar personajes por cuenta;
 - emitir sesión inicial;
 - devolver lista de servidores disponibles.
 

@@ -17,10 +17,19 @@ Construir un backend propio, mantenible y documentado, sin copiar archivos propi
 
 ## Flujo actual
 
+### Nivel 1 - Login y cuentas
 1. registrar cuenta con `POST /api/accounts/register`;
 2. consultar salud con `GET /health`;
 3. obtener servidores con `GET /api/servers`;
 4. autenticar con `POST /api/login`.
+
+### Nivel 2 - Personajes
+5. crear personaje con `POST /api/characters`;
+6. listar personajes por cuenta con `GET /api/accounts/{accountId}/characters`.
+
+## Seguimiento del progreso
+
+Consulta `docs/progress-roadmap.md` para ver en qué nivel vamos, qué terminamos y qué sigue después.
 
 ## Primer paso de estudio
 
