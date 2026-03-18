@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="GB2312"?>
+<!--this is ItemColor config-->
+<ItemColor>
+    <Equip>
+        <Base>
+            <BaseLevel1 BaseLv="1" BaseName="普通的" BaseColor="DEFAULT_TEXTCOLOR"/>
+            <BaseLevel2 BaseLv="2" BaseName="加固的" BaseColor="TEAM_COLOR"/>
+            <BaseLevel3 BaseLv="3" BaseName="精制的" BaseColor="ItemCOLOR"/>
+            <BaseLevel4 BaseLv="4" BaseName="优良的" BaseColor="GREEN_TEXTCOLOR"/>
+            <BaseLevel5 BaseLv="5" BaseName="卓越的" BaseColor="GUILD_COLOR"/>
+            <BaseLevel6 BaseLv="6" BaseName="经典的" BaseColor="Classical_color"/>
+            <BaseLevel7 BaseLv="7" BaseName="永恒的" BaseColor="YELLOW_TEXTCOLOR"/>
+            <BaseLevel8 BaseLv="8" BaseName="史诗的" BaseColor="WHISPER_COLOR"/>
+            <BaseLevel9 BaseLv="9" BaseName="传说的" BaseColor="Legend_color"/>
+            <BaseLevel10 BaseLv="10" BaseName="神话的" BaseColor="Itemper_color"/>
+            <BaseLevel11 BaseLv="11" BaseName="Divine" BaseColor="Divine_color"/>
+            <BaseLevel12 BaseLv="12" BaseName="Celestial" BaseColor="Celestial_color"/>
+            <BaseLevel13 BaseLv="13" BaseName="Mythical" BaseColor="Mythical_color"/>
+            <BaseLevel14 BaseLv="14" BaseName="Astral" BaseColor="Astral_color"/>
+            <BaseLevel15 BaseLv="15" BaseName="Arcane" BaseColor="Arcane_color"/>
+            <BaseLevel16 BaseLv="16" BaseName="Ethereal" BaseColor="Ethereal_color"/>
+            <BaseLevel17 BaseLv="17" BaseName="Transcendent" BaseColor="Transcendent_color"/>
+            <BaseLevel18 BaseLv="18" BaseName="Ancient" BaseColor="Ancient_color"/>
+            <BaseLevel19 BaseLv="19" BaseName="Primordial" BaseColor="Primordial_color"/>
+            <BaseLevel20 BaseLv="20" BaseName="Boundless" BaseColor="Boundless_color"/>
+
+        </Base>
+        <Append>
+            <AppLevel1 AppendLv="1" AppendStar="☆" AppendColor="DEFAULT_TEXTCOLOR" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel2 AppendLv="2" AppendStar="☆☆" AppendColor="DEFAULT_TEXTCOLOR" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel3 AppendLv="3" AppendStar="★★★" AppendColor="TEAM_COLOR" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel4 AppendLv="4" AppendStar="★★★★" AppendColor="TEAM_COLOR" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel5 AppendLv="5" AppendStar="★★★★★" AppendColor="ItemCOLOR" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel6 AppendLv="6" AppendStar="★★★★★★" AppendColor="GREEN_TEXTCOLOR" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel7 AppendLv="7" AppendStar="●●●●●●●" AppendColor="GUILD_COLOR" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel8 AppendLv="8" AppendStar="●●●●●●●●" AppendColor="YELLOW_TEXTCOLOR" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel9 AppendLv="9" AppendStar="囧囧囧囧囧囧囧囧囧" AppendColor="WHISPER_COLOR" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel10 AppendLv="10" AppendStar="囧囧囧囧囧囧囧囧囧囧" AppendColor="WHISPER_COLOR" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel11 AppendLv="11" AppendStar="囧囧囧囧囧囧囧囧囧囧囧" AppendColor="Legend_color" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel12 AppendLv="12" AppendStar="囧囧囧囧囧囧囧囧囧囧囧囧" AppendColor="Itemper_color" AppAttributeColor="GREEN_TEXTCOLOR"/>
+            <AppLevel13 AppendLv="13" AppendStar="囧囧囧囧囧囧囧囧囧囧囧囧囧" AppendColor="Ancient_color" AppAttributeColor="GREEN_TEXTCOLOR"/>
+
+        </Append>
+        <Pet>
+            <Aptitude1 BaseLv="1" BaseName="懦弱的" BaseColor="DEFAULT_TEXTCOLOR"/>
+            <Aptitude2 BaseLv="2" BaseName="愚钝的" BaseColor="DEFAULT_TEXTCOLOR"/>
+            <Aptitude3 BaseLv="3" BaseName="胆怯的" BaseColor="DEFAULT_TEXTCOLOR"/>
+            <Aptitude4 BaseLv="4" BaseName="中庸的" BaseColor="DEFAULT_TEXTCOLOR"/>
+            <Aptitude5 BaseLv="5" BaseName="理智的" BaseColor="TEAM_COLOR"/>
+            <Aptitude6 BaseLv="6" BaseName="冷静的" BaseColor="YELLOW_TEXTCOLOR"/>
+            <Aptitude7 BaseLv="7" BaseName="聪慧的" BaseColor="YELLOW_TEXTCOLOR"/>
+            <Aptitude8 BaseLv="8" BaseName="热情的" BaseColor="GREEN_TEXTCOLOR"/>
+            <Aptitude9 BaseLv="9" BaseName="暴躁的" BaseColor="TEAM_COLOR"/>
+            <Aptitude10 BaseLv="10" BaseName="无畏的" BaseColor="GREEN_TEXTCOLOR"/>
+            <Aptitude11 BaseLv="11" BaseName="霸道的" BaseColor="TEAM_COLOR"/>
+            <Aptitude12 BaseLv="12" BaseName="凶猛的" BaseColor="GREEN_TEXTCOLOR"/>
+            <Aptitude13 BaseLv="13" BaseName="万能的" BaseColor="TEAM_COLOR"/>
+            <Aptitude14 BaseLv="14" BaseName="众神的" BaseColor="Itemper_color"/>
+            <Aptitude15 BaseLv="15" BaseName="备用" BaseColor="TEAM_COLOR"/>
+            <Aptitude16 BaseLv="16" BaseName="备用" BaseColor="TEAM_COLOR"/>
+            <Aptitude17 BaseLv="17" BaseName="备用" BaseColor="TEAM_COLOR"/>
+            <Aptitude18 BaseLv="18" BaseName="备用" BaseColor="TEAM_COLOR"/>
+            <Aptitude19 BaseLv="19" BaseName="备用" BaseColor="TEAM_COLOR"/>
+            <Aptitude20 BaseLv="20" BaseName="备用" BaseColor="TEAM_COLOR"/>
+        </Pet>
+    </Equip>
+</ItemColor>
