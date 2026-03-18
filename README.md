@@ -42,8 +42,9 @@ Construir un backend propio, mantenible y documentado, sin copiar archivos propi
 18. usar `AROUND <token>` y `POLL <token>` con visibilidad local por rango.
 19. exponer NPCs y monstruos como snapshot vivo por mapa con `instanceId` y `zoneKey`.
 20. emitir actualización dinámica básica de monstruos por zona y reflejarla en `POLL <token>`.
+21. estabilizar contrato del gateway con `HANDSHAKE_OK|version=...`, `EVENTS|version=...` y `AROUND|version=...`.
 
-Siguiente foco recomendado: handshake más completo + separar responsabilidades de GameServer cuando el mundo activo crezca.
+Siguiente foco recomendado: ya es razonable preparar el corte hacia `GameServer` después de este ajuste de contrato.
 
 ## Seguimiento del progreso
 

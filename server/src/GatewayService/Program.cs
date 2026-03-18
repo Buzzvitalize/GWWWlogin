@@ -3,6 +3,7 @@ using GWWWlogin.GatewayService.Data;
 using GWWWlogin.GatewayService.Definitions;
 using GWWWlogin.GatewayService.HostedServices;
 using GWWWlogin.GatewayService.Models;
+using GWWWlogin.GatewayService.Protocols;
 using GWWWlogin.GatewayService.Services;
 using GWWWlogin.GatewayService.World;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +37,9 @@ app.MapGet("/health", async (IConfiguration configuration, GatewayDbContext dbCo
         sessions = sessionCount,
         maps = mapDefinitionService.GetAll().Count,
         supportedCommands = new[] { "HELLO", "ENTER_MAP", "PING", "WHOAMI", "MOVE", "LEAVE", "POLL", "AROUND" },
+        handshakeVersion = GatewayProtocolSerializer.HandshakeVersion,
+        worldEventVersion = GatewayProtocolSerializer.WorldEventVersion,
+        aroundVersion = GatewayProtocolSerializer.AroundVersion,
         utc = DateTime.UtcNow
     });
 });

@@ -68,12 +68,12 @@ Cuando cambiemos de nivel lo vamos a dejar anotado aquí con esta frase:
 - visibilidad local por rango para `AROUND` y `POLL`.
 - snapshot vivo por mapa para NPCs/monstruos con `instanceId` y `zoneKey`.
 - actualización dinámica básica de monstruos por zona vía broadcast.
+- contrato estable/versionado para handshake, `POLL` y `AROUND`.
 
 ### Qué sigue después
-- ampliar handshake del cliente con más datos de escena;
+- separar simulación/estado activo hacia un `GameServer` dedicado;
 - usar `Localization/en_us` y `Map/` como referencia del cliente;
-- consolidar separación hacia un `GameServer` cuando el mundo activo y la simulación crezcan;
 - maps reales.
 
 ### Siguiente paso recomendado en esta fase
-- podemos seguir un poco más en Nivel 3 para enriquecer handshake/contratos; después de eso ya es razonable separar un `GameServer` dedicado.
+- ya podemos planear formalmente el corte a `GameServer`; el gateway ya tiene suficiente contrato para dejar de crecer como world host.

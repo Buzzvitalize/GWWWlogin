@@ -63,7 +63,11 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
 
         return new GatewayCommandResult(
             true,
-            $"HANDSHAKE_OK v1 {session.AccountId} {session.SelectedCharacter.Id} {session.SelectedCharacter.Faction} {session.SelectedCharacter.SceneName} {session.SelectedCharacter.MapId}");
+            GatewayProtocolSerializer.FormatHandshake(
+                session.AccountId,
+                session.SelectedCharacter,
+                VisibilityRadius,
+                GatewayProtocolSerializer.WorldEventVersion));
     }
 
     private async Task<GatewayCommandResult> HandleEnterMapAsync(string token, CancellationToken cancellationToken)
@@ -288,8 +292,7 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
             .Where(x => IsWithinVisibilityRange(state, x.PositionX, x.PositionY))
             .ToList();
 
-        var payload = string.Join("|", visibleEvents.Select(x => $"{x.SequenceId},{x.EventType},{x.EntityKind},{x.EntityInstanceId},{x.CharacterName},{x.PositionX},{x.PositionY}"));
-        return new GatewayCommandResult(true, $"EVENTS {payload}");
+        return new GatewayCommandResult(true, GatewayProtocolSerializer.FormatWorldEvents(visibleEvents));
     }
 
     private async Task<GatewayCommandResult> HandleAroundAsync(string token, CancellationToken cancellationToken)
@@ -314,13 +317,9 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
         var npcs = mapStateService.GetNpcsInRange(state.MapId, state.PositionX, state.PositionY, VisibilityRadius);
         var monsters = mapStateService.GetMonstersInRange(state.MapId, state.PositionX, state.PositionY, VisibilityRadius);
 
-        var playerText = string.Join(";", players.Select(x => $"P,{x.CharacterName},{x.PositionX},{x.PositionY}"));
-        var npcText = string.Join(";", npcs.Select(x => $"N,{x.InstanceId},{x.DisplayName},{x.ZoneKey},{x.PositionX},{x.PositionY}"));
-        var monsterText = string.Join(";", monsters.Select(x => $"M,{x.InstanceId},{x.DisplayName},{x.ZoneKey},{x.PositionX},{x.PositionY},{(x.IsAlive ? "alive" : "down")}"));
-
-        var payload = string.Join("|", new[] { playerText, npcText, monsterText }.Where(x => !string.IsNullOrWhiteSpace(x)));
-        return new GatewayCommandResult(true, $"AROUND {payload}");
+        return new GatewayCommandResult(true, GatewayProtocolSerializer.FormatAround(players, npcs, monsters));
     }
+
     private static bool IsWithinVisibilityRange(ActivePlayerState observer, float targetX, float targetY)
     {
         var deltaX = targetX - observer.PositionX;
