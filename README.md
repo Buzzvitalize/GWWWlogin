@@ -59,6 +59,10 @@ Siguiente foco recomendado: `POLL` ya puede leer runtime del `GameServer`; lo si
 
 Consulta `docs/progress-roadmap.md` para ver en qué nivel vamos, qué terminamos y qué sigue después.
 
+## Ejecución reproducible
+
+Consulta `docs/vscode-runbook.md` para abrir el repo en VS Code / GitHub y levantar `LoginService`, `GatewayService` y `GameServer` paso a paso.
+
 ## Referencia del cliente local
 
 Consulta `docs/client-reference.md` para aprovechar la información ya subida en `Gw Client/Localization/en_us` y `Gw Client/Map`.

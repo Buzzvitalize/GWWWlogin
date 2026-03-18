@@ -1,7 +1,10 @@
 bin/
 obj/
 .vs/
-.vscode/
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/extensions.json
 .env
 artifacts/
 server/.idea/

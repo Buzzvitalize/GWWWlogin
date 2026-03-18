@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "ms-dotnettools.csharp",
+    "ms-dotnettools.csdevkit",
+    "humao.rest-client",
+    "ms-azuretools.vscode-docker"
+  ]
+}

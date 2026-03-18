@@ -82,3 +82,5 @@ Ahora que el contrato del gateway quedó más estable, seguimos con esta secuenc
 2. definir el contrato interno entre `GatewayService` y `GameServer`;
 3. dejar guía reproducible para abrir el repo desde VS Code/GitHub y levantar servicios locales;
 4. luego recién pensar en una beta cerrada.
+
+La guía inicial ya está en `docs/vscode-runbook.md`.

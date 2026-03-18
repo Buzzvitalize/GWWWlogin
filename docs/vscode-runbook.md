@@ -1,0 +1,98 @@
+# VS Code / GitHub runbook
+
+## Objetivo
+
+Dejar una forma reproducible de levantar:
+
+- `LoginService`;
+- `GatewayService`;
+- `GameServer`;
+- dependencias locales (`postgres`, `redis`).
+
+## 1. Requisitos mínimos
+
+Necesitas una máquina o entorno con:
+
+- `.NET 8 SDK`;
+- `Docker` + `docker compose`;
+- `Visual Studio Code`.
+
+Si abres el repo desde GitHub/Codespaces, asegúrate de que el entorno tenga `dotnet` disponible. En este contenedor de trabajo no está instalado, por eso aquí dejamos la configuración preparada pero no ejecutada.
+
+## 2. Levantar dependencias
+
+Desde `server/`:
+
+```bash
+docker compose up -d
+```
+
+Esto levanta:
+
+- PostgreSQL en `localhost:5432`;
+- Redis en `localhost:6379`.
+
+## 3. Servicios a ejecutar
+
+Orden recomendado:
+
+1. `LoginService`
+2. `GameServer`
+3. `GatewayService`
+
+## 4. Opción A: usar VS Code Tasks
+
+En VS Code ya quedan preparadas estas tasks:
+
+- `compose-up`
+- `compose-down`
+- `build-server-sln`
+- `run-loginservice`
+- `run-gatewayservice`
+- `run-gameserver`
+
+## 5. Opción B: usar VS Code Launch
+
+En `.vscode/launch.json` quedan estas configuraciones:
+
+- `LoginService`
+- `GatewayService`
+- `GameServer`
+- compound `Backend Trio`
+
+El compound sirve para arrancar los tres procesos desde VS Code.
+
+## 6. URLs esperadas
+
+### LoginService
+- `GET /health`
+
+### GatewayService
+- `GET /health`
+- TCP gateway en el puerto configurado del servicio
+
+### GameServer
+- `GET /health`
+- `GET /world/maps`
+- `GET /world/monsters`
+- `GET /world/events`
+
+## 7. Flujo manual mínimo para observar el sistema
+
+1. levantar dependencias con Docker;
+2. correr `LoginService`;
+3. correr `GameServer`;
+4. correr `GatewayService`;
+5. registrar cuenta y login;
+6. crear personaje y seleccionarlo;
+7. pedir gateway ticket;
+8. conectar cliente TCP al gateway;
+9. probar `HELLO`, `ENTER_MAP`, `AROUND` y `POLL`.
+
+## 8. Qué sigue después de esta guía
+
+Una vez que esto esté corrido de punta a punta, el siguiente paso recomendado es:
+
+- terminar de retirar restos de simulación local del gateway;
+- documentar la conexión con el cliente legado;
+- y recién después evaluar una beta cerrada.

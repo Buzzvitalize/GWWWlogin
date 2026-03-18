@@ -93,9 +93,10 @@ Cuando cambiemos de nivel lo vamos a dejar anotado aquí con esta frase:
 - snapshots internos `/world/maps`, `/world/monsters`, `/world/events`;
 - primer bridge real `GatewayService -> GameServer` para monstruos vivos en `AROUND`;
 - `POLL` mezclando eventos locales de jugador con runtime de `GameServer`;
+- guía inicial de ejecución reproducible para VS Code/GitHub;
 - primer corte documental entre gateway y runtime de mundo.
 
 ### Qué sigue después
-- preparar guía reproducible para VS Code/GitHub y ejecución local;
+- guía reproducible para VS Code/GitHub y ejecución local;
 - terminar de retirar simulación viva restante desde `GatewayService`;
 - maps reales.
