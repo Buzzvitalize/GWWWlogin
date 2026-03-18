@@ -9,6 +9,8 @@ public sealed class AuthDbContext(DbContextOptions<AuthDbContext> options) : DbC
 
     public DbSet<Character> Characters => Set<Character>();
 
+    public DbSet<Session> Sessions => Set<Session>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         var account = modelBuilder.Entity<Account>();
@@ -94,5 +96,36 @@ public sealed class AuthDbContext(DbContextOptions<AuthDbContext> options) : DbC
             .WithMany(x => x.Characters)
             .HasForeignKey(x => x.AccountId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        var session = modelBuilder.Entity<Session>();
+
+        session.ToTable("sessions");
+        session.HasKey(x => x.Id);
+
+        session.Property(x => x.Token)
+            .HasMaxLength(128)
+            .IsRequired();
+
+        session.Property(x => x.CreatedAtUtc)
+            .IsRequired();
+
+        session.Property(x => x.ExpiresAtUtc)
+            .IsRequired();
+
+        session.Property(x => x.LastSeenAtUtc)
+            .IsRequired();
+
+        session.HasIndex(x => x.Token)
+            .IsUnique();
+
+        session.HasOne(x => x.Account)
+            .WithMany(x => x.Sessions)
+            .HasForeignKey(x => x.AccountId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        session.HasOne(x => x.SelectedCharacter)
+            .WithMany(x => x.Sessions)
+            .HasForeignKey(x => x.SelectedCharacterId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

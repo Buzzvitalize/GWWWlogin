@@ -16,6 +16,8 @@ public sealed class Account
 
     public ICollection<Character> Characters { get; set; } = new List<Character>();
 
+    public ICollection<Session> Sessions { get; set; } = new List<Session>();
+
     public DateTime CreatedAtUtc { get; set; }
 
     public DateTime UpdatedAtUtc { get; set; }

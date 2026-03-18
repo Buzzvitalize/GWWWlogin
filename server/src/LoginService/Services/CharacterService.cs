@@ -1,5 +1,6 @@
 using GWWWlogin.LoginService.Data;
 using GWWWlogin.LoginService.Models;
+using GWWWlogin.LoginService.Rules;
 using GWWWlogin.Shared;
 using Microsoft.EntityFrameworkCore;
 
@@ -36,10 +37,10 @@ public sealed class CharacterService(AuthDbContext dbContext) : ICharacterServic
             NormalizedName = normalizedName,
             Class = characterClass,
             Gender = gender,
-            Level = 1,
-            MapId = 1000,
-            PositionX = 128,
-            PositionY = 128,
+            Level = GameplayRules.StartingLevel,
+            MapId = GameplayRules.StartingMapId,
+            PositionX = GameplayRules.StartingPositionX,
+            PositionY = GameplayRules.StartingPositionY,
             CreatedAtUtc = now,
             UpdatedAtUtc = now
         };

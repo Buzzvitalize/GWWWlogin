@@ -8,7 +8,8 @@ Responsable de:
 - autenticar usuarios;
 - crear personajes iniciales;
 - listar personajes por cuenta;
-- emitir sesión inicial;
+- emitir sesión inicial persistida;
+- seleccionar personaje antes del gateway;
 - devolver lista de servidores disponibles.
 
 ## Carpetas

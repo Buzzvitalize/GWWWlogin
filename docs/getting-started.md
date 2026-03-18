@@ -34,6 +34,8 @@ Usaremos **C# con .NET 8** como objetivo del proyecto porque ofrece:
 - crear personaje;
 - listar personajes por cuenta;
 - definir punto inicial de spawn;
+- persistir sesión;
+- seleccionar personaje;
 - dejar anotado el siguiente paso.
 
 ### Fase 3
@@ -64,7 +66,7 @@ Lee estos archivos en este orden:
 
 Cuando terminemos este nivel, seguimos con una de estas tareas:
 
-1. crear selección de personaje;
+1. marcar este nivel como terminado;
 2. agregar migrations formales de EF Core;
-3. emitir session tokens persistidos;
-4. crear el gateway TCP del juego.
+3. crear el gateway TCP del juego;
+4. empezar entrada al mapa y comandos base.

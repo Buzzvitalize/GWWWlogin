@@ -11,6 +11,7 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
 
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ICharacterService, CharacterService>();
+builder.Services.AddScoped<ISessionService, SessionService>();
 
 var app = builder.Build();
 
@@ -29,6 +30,7 @@ app.MapGet("/health", async (AuthDbContext dbContext, CancellationToken cancella
 {
     var accountCount = await dbContext.Accounts.CountAsync(cancellationToken);
     var characterCount = await dbContext.Characters.CountAsync(cancellationToken);
+    var sessionCount = await dbContext.Sessions.CountAsync(cancellationToken);
 
     return Results.Ok(new
     {
@@ -36,7 +38,8 @@ app.MapGet("/health", async (AuthDbContext dbContext, CancellationToken cancella
         status = "ok",
         utc = DateTime.UtcNow,
         accounts = accountCount,
-        characters = characterCount
+        characters = characterCount,
+        sessions = sessionCount
     });
 });
 
@@ -81,6 +84,8 @@ app.MapPost("/api/login", async (
         return Results.BadRequest(new LoginResponse(
             false,
             "Username and password are required.",
+            null,
+            null,
             null,
             Array.Empty<ServerInfo>()));
     }
@@ -135,6 +140,49 @@ app.MapPost("/api/characters", async (
     {
         var response = await characterService.CreateAsync(request, cancellationToken);
         return Results.Created($"/api/characters/{response.Id}", response);
+    }
+    catch (KeyNotFoundException ex)
+    {
+        return Results.NotFound(new
+        {
+            message = ex.Message
+        });
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.Conflict(new
+        {
+            message = ex.Message
+        });
+    }
+});
+
+app.MapGet("/api/sessions/{token}", async (
+    string token,
+    ISessionService sessionService,
+    CancellationToken cancellationToken) =>
+{
+    var session = await sessionService.GetByTokenAsync(token, cancellationToken);
+    return session is null ? Results.NotFound() : Results.Ok(session);
+});
+
+app.MapPost("/api/sessions/select-character", async (
+    SelectCharacterRequest request,
+    ISessionService sessionService,
+    CancellationToken cancellationToken) =>
+{
+    if (string.IsNullOrWhiteSpace(request.SessionToken) || request.CharacterId == Guid.Empty)
+    {
+        return Results.BadRequest(new
+        {
+            message = "Session token and character id are required."
+        });
+    }
+
+    try
+    {
+        var response = await sessionService.SelectCharacterAsync(request, cancellationToken);
+        return Results.Ok(response);
     }
     catch (KeyNotFoundException ex)
     {

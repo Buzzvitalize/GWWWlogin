@@ -25,7 +25,9 @@ Construir un backend propio, mantenible y documentado, sin copiar archivos propi
 
 ### Nivel 2 - Personajes
 5. crear personaje con `POST /api/characters`;
-6. listar personajes por cuenta con `GET /api/accounts/{accountId}/characters`.
+6. listar personajes por cuenta con `GET /api/accounts/{accountId}/characters`;
+7. seleccionar personaje con `POST /api/sessions/select-character`;
+8. consultar sesión con `GET /api/sessions/{token}`.
 
 ## Seguimiento del progreso
 

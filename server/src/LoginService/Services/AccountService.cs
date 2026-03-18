@@ -1,5 +1,6 @@
 using GWWWlogin.LoginService.Data;
 using GWWWlogin.LoginService.Models;
+using GWWWlogin.LoginService.Rules;
 using GWWWlogin.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -61,20 +62,30 @@ public sealed class AccountService(AuthDbContext dbContext) : IAccountService
 
         if (account is null)
         {
-            return new LoginResponse(false, "Invalid username or password.", null, Array.Empty<ServerInfo>());
+            return new LoginResponse(false, "Invalid username or password.", null, null, null, Array.Empty<ServerInfo>());
         }
 
         var verification = _passwordHasher.VerifyHashedPassword(account, account.PasswordHash, request.Password);
         if (verification == PasswordVerificationResult.Failed)
         {
-            return new LoginResponse(false, "Invalid username or password.", null, Array.Empty<ServerInfo>());
+            return new LoginResponse(false, "Invalid username or password.", null, null, null, Array.Empty<ServerInfo>());
         }
 
-        var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+        var now = DateTime.UtcNow;
+        var session = new Session
+        {
+            Id = Guid.NewGuid(),
+            AccountId = account.Id,
+            Token = Convert.ToBase64String(Guid.NewGuid().ToByteArray()),
+            CreatedAtUtc = now,
+            ExpiresAtUtc = now.AddHours(12),
+            LastSeenAtUtc = now
+        };
 
-        account.UpdatedAtUtc = DateTime.UtcNow;
+        dbContext.Sessions.Add(session);
+        account.UpdatedAtUtc = now;
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return new LoginResponse(true, $"Welcome, {account.Username}.", token, servers);
+        return new LoginResponse(true, $"Welcome, {account.Username}.", account.Id, session.Token, session.ExpiresAtUtc, servers);
     }
 }

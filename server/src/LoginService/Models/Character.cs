@@ -24,6 +24,8 @@ public sealed class Character
 
     public float PositionY { get; set; }
 
+    public ICollection<Session> Sessions { get; set; } = new List<Session>();
+
     public DateTime CreatedAtUtc { get; set; }
 
     public DateTime UpdatedAtUtc { get; set; }
