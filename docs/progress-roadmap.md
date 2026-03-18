@@ -94,9 +94,10 @@ Cuando cambiemos de nivel lo vamos a dejar anotado aquí con esta frase:
 - primer bridge real `GatewayService -> GameServer` para monstruos vivos en `AROUND`;
 - `POLL` mezclando eventos locales de jugador con runtime de `GameServer`;
 - guía inicial de ejecución reproducible para VS Code/GitHub;
+- checklist operativa para primer run con cliente;
 - primer corte documental entre gateway y runtime de mundo.
 
 ### Qué sigue después
-- guía reproducible para VS Code/GitHub y ejecución local;
-- terminar de retirar simulación viva restante desde `GatewayService`;
+- observar una corrida real completa con el cliente;
+- documentar mejor la conexión con el cliente legado;
 - maps reales.

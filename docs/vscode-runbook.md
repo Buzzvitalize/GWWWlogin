@@ -89,10 +89,14 @@ El compound sirve para arrancar los tres procesos desde VS Code.
 8. conectar cliente TCP al gateway;
 9. probar `HELLO`, `ENTER_MAP`, `AROUND` y `POLL`.
 
-## 8. Qué sigue después de esta guía
+## 8. Checklist operativa
+
+Consulta también `docs/client-first-run-checklist.md` para una pasada más operativa de endpoints, comandos y señales de problema.
+
+## 9. Qué sigue después de esta guía
 
 Una vez que esto esté corrido de punta a punta, el siguiente paso recomendado es:
 
-- terminar de retirar restos de simulación local del gateway;
-- documentar la conexión con el cliente legado;
+- documentar mejor la conexión con el cliente legado;
+- observar una corrida completa de punta a punta;
 - y recién después evaluar una beta cerrada.

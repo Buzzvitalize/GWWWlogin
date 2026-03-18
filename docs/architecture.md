@@ -19,7 +19,7 @@ Responsable de:
 - ejecutar handshake inicial por sesión;
 - validar entrada al mapa usando la sesión persistida;
 - negociar contrato/versiones del protocolo;
-- reenviar a futuro hacia el runtime del mundo.
+- reenviar hacia el runtime del mundo alojado en `GameServer`.
 
 ### GameServer
 Responsable de:
