@@ -34,7 +34,7 @@ app.MapGet("/health", async (IConfiguration configuration, GatewayDbContext dbCo
         publicHost = options.PublicHost,
         sessions = sessionCount,
         maps = mapDefinitionService.GetAll().Count,
-        supportedCommands = new[] { "HELLO", "ENTER_MAP", "PING", "WHOAMI", "MOVE", "LEAVE", "POLL" },
+        supportedCommands = new[] { "HELLO", "ENTER_MAP", "PING", "WHOAMI", "MOVE", "LEAVE", "POLL", "AROUND" },
         utc = DateTime.UtcNow
     });
 });

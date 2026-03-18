@@ -30,6 +30,7 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
             "MOVE" when parts.Length == 4 && float.TryParse(parts[2], out var x) && float.TryParse(parts[3], out var y) => await HandleMoveAsync(token, x, y, cancellationToken),
             "LEAVE" when parts.Length == 2 => await HandleLeaveAsync(token, cancellationToken),
             "POLL" when parts.Length == 2 => await HandlePollAsync(token, cancellationToken),
+            "AROUND" when parts.Length == 2 => await HandleAroundAsync(token, cancellationToken),
             _ => new GatewayCommandResult(false, "ERROR unknown_command")
         };
     }
@@ -60,7 +61,7 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
 
         return new GatewayCommandResult(
             true,
-            $"HANDSHAKE_OK {session.AccountId} {session.SelectedCharacter.Id} {session.SelectedCharacter.SceneName} {session.SelectedCharacter.MapId}");
+            $"HANDSHAKE_OK v1 {session.AccountId} {session.SelectedCharacter.Id} {session.SelectedCharacter.Faction} {session.SelectedCharacter.SceneName} {session.SelectedCharacter.MapId}");
     }
 
     private async Task<GatewayCommandResult> HandleEnterMapAsync(string token, CancellationToken cancellationToken)
@@ -264,5 +265,33 @@ public sealed class GatewaySessionService(GatewayDbContext dbContext, IMapStateS
         var events = mapBroadcastService.Read(state.MapId, 5);
         var payload = string.Join("|", events.Select(x => $"{x.EventType},{x.CharacterName},{x.PositionX},{x.PositionY}"));
         return new GatewayCommandResult(true, $"EVENTS {payload}");
+    }
+
+    private async Task<GatewayCommandResult> HandleAroundAsync(string token, CancellationToken cancellationToken)
+    {
+        var session = await dbContext.Sessions
+            .SingleOrDefaultAsync(x => x.Token == token, cancellationToken);
+
+        if (session is null)
+        {
+            return new GatewayCommandResult(false, "ERROR session_not_found");
+        }
+
+        var state = mapStateService.GetBySession(session.Id);
+        if (state is null)
+        {
+            return new GatewayCommandResult(false, "ERROR player_not_in_map");
+        }
+
+        var players = mapStateService.GetPlayers(state.MapId);
+        var npcs = mapStateService.GetNpcs(state.MapId);
+        var monsters = mapStateService.GetMonsters(state.MapId);
+
+        var playerText = string.Join(";", players.Select(x => $"P,{x.CharacterName},{x.PositionX},{x.PositionY}"));
+        var npcText = string.Join(";", npcs.Select(x => $"N,{x.DisplayName},{x.PositionX},{x.PositionY}"));
+        var monsterText = string.Join(";", monsters.Select(x => $"M,{x.DisplayName},{x.PositionX},{x.PositionY}"));
+
+        var payload = string.Join("|", new[] { playerText, npcText, monsterText }.Where(x => !string.IsNullOrWhiteSpace(x)));
+        return new GatewayCommandResult(true, $"AROUND {payload}");
     }
 }

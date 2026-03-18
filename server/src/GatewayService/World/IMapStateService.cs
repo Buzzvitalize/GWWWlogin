@@ -22,5 +22,11 @@ public interface IMapStateService
 
     ActivePlayerState? Leave(Guid sessionId);
 
+    IReadOnlyList<PlayerPresence> GetPlayers(int mapId);
+
+    IReadOnlyList<NpcSpawnState> GetNpcs(int mapId);
+
+    IReadOnlyList<MonsterSpawnState> GetMonsters(int mapId);
+
     int GetPopulation(int mapId);
 }
