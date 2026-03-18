@@ -51,3 +51,10 @@ server/
 - Mantener TCP del juego para una siguiente fase.
 - Usar DTOs simples y contratos claros.
 - Separar gateway y simulación cuando el contrato del mundo ya sea estable.
+
+## Persistencia actual
+
+- `LoginService` persiste cuentas, personajes y sesiones en PostgreSQL.
+- `GatewayService` reutiliza esa misma base para validar y consultar sesiones.
+- `GameServer` todavía corre principalmente en memoria; aún no tiene persistencia dedicada para mundo/spawns/IA.
+- `Redis` aparece preparado en `docker-compose.yml` como dependencia futura, pero todavía no es una pieza obligatoria del flujo principal.
