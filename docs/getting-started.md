@@ -47,6 +47,12 @@ Usaremos **C# con .NET 8** como objetivo del proyecto porque ofrece:
 - ticket de entrada al mapa;
 - catálogo de paquetes.
 
+### Fase 4
+- separar `GameServer`;
+- mover simulación activa fuera del gateway;
+- preparar conexión interna gateway <-> runtime del mundo;
+- dejar el entorno listo para correr desde VS Code/GitHub cuando `dotnet` esté disponible.
+
 ## 4. Cómo pensar el sistema
 
 Separa siempre:
@@ -70,9 +76,9 @@ Lee estos archivos en este orden:
 
 ## 6. Próximo paso recomendado
 
-Cuando terminemos este nivel, seguimos con una de estas tareas:
+Ahora que el contrato del gateway quedó más estable, seguimos con esta secuencia:
 
-1. ampliar handshake inicial del gateway;
-2. agregar migrations formales de EF Core;
-3. crear estado real del mapa con entidades;
-4. agregar broadcast y sincronización base.
+1. mover simulación/estado activo a `GameServer`;
+2. definir el contrato interno entre `GatewayService` y `GameServer`;
+3. dejar guía reproducible para abrir el repo desde VS Code/GitHub y levantar servicios locales;
+4. luego recién pensar en una beta cerrada.

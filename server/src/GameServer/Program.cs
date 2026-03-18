@@ -1,0 +1,30 @@
+using GWWWlogin.GameServer.HostedServices;
+using GWWWlogin.GameServer.Models;
+using GWWWlogin.GameServer.World;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<GameServerOptions>(builder.Configuration.GetSection(GameServerOptions.SectionName));
+builder.Services.AddSingleton<IGameWorldService, GameWorldService>();
+builder.Services.AddHostedService<ZoneSimulationHostedService>();
+
+var app = builder.Build();
+
+app.MapGet("/health", (IConfiguration configuration, IGameWorldService gameWorldService) =>
+{
+    var options = configuration.GetSection(GameServerOptions.SectionName).Get<GameServerOptions>() ?? new GameServerOptions();
+    var maps = gameWorldService.GetMaps();
+
+    return Results.Ok(new
+    {
+        service = "game-server",
+        status = "ok",
+        host = options.Host,
+        port = options.Port,
+        zoneSize = options.ZoneSize,
+        maps,
+        utc = DateTime.UtcNow
+    });
+});
+
+app.Run();

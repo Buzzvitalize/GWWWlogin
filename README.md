@@ -12,8 +12,10 @@ Construir un backend propio, mantenible y documentado, sin copiar archivos propi
 ## Arquitectura inicial
 
 1. `LoginService`: registro, autenticación, lista de servidores y token de sesión.
-2. `Shared`: contratos y utilidades comunes.
-3. `docs/`: notas del protocolo, fases del proyecto y decisiones técnicas.
+2. `GatewayService`: entrada TCP, sesión, handshake y forwarding inicial.
+3. `GameServer`: simulación activa del mundo por mapa/zona.
+4. `Shared`: contratos y utilidades comunes.
+5. `docs/`: notas del protocolo, fases del proyecto y decisiones técnicas.
 
 ## Flujo actual
 
@@ -44,7 +46,13 @@ Construir un backend propio, mantenible y documentado, sin copiar archivos propi
 20. emitir actualización dinámica básica de monstruos por zona y reflejarla en `POLL <token>`.
 21. estabilizar contrato del gateway con `HANDSHAKE_OK|version=...`, `EVENTS|version=...` y `AROUND|version=...`.
 
-Siguiente foco recomendado: ya es razonable preparar el corte hacia `GameServer` después de este ajuste de contrato.
+Siguiente foco recomendado: ya iniciamos el corte hacia `GameServer`; lo siguiente es mover más simulación y luego preparar una configuración reproducible para VS Code/GitHub.
+
+### Nivel 4 - Separación de GameServer
+22. crear proyecto `GameServer`;
+23. exponer `GET /health` para runtime de mundo;
+24. mover el loop base de simulación por zona a `GameServer`;
+25. preparar conexión futura entre `GatewayService` y `GameServer`.
 
 ## Seguimiento del progreso
 

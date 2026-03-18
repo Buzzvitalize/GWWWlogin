@@ -48,7 +48,7 @@ Cuando cambiemos de nivel lo vamos a dejar anotado aquí con esta frase:
 ## Nivel 3 - Gateway y entrada al mapa
 
 ### Estado
-- en progreso.
+- terminado.
 
 ### Ya hicimos en este nivel
 - proyecto `GatewayService`;
@@ -77,3 +77,23 @@ Cuando cambiemos de nivel lo vamos a dejar anotado aquí con esta frase:
 
 ### Siguiente paso recomendado en esta fase
 - ya podemos planear formalmente el corte a `GameServer`; el gateway ya tiene suficiente contrato para dejar de crecer como world host.
+
+> Ya terminamos este nivel; ahora sí pasamos al siguiente bloque.
+
+## Nivel 4 - Separación de GameServer
+
+### Estado
+- en progreso.
+
+### Ya hicimos en este nivel
+- proyecto `GameServer`;
+- `GET /health` para runtime del mundo;
+- servicio base `GameWorldService`;
+- loop inicial `ZoneSimulationHostedService`;
+- primer corte documental entre gateway y runtime de mundo.
+
+### Qué sigue después
+- mover más simulación viva desde `GatewayService` hacia `GameServer`;
+- definir contrato interno gateway <-> game server;
+- preparar guía reproducible para VS Code/GitHub y ejecución local;
+- maps reales.
